@@ -18,7 +18,7 @@ class logs
 	{
 		if( !$logname ) return;
 		$out = date( 'd.m.Y H:i:s' ) . "\t"	. $message.PHP_EOL;
-		return disk::append( 'logs', "$logname.log", $out );
+		return files::append( 'logs', "$logname.log", $out );
 	}
 
 	private static function id()

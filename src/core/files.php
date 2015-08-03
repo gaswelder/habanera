@@ -1,5 +1,5 @@
 <?php
-class disk
+class files
 {
 	static function save( $dir, $name, $value )
 	{
