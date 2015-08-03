@@ -60,14 +60,13 @@ if( !isset( $_SERVER['HTTP_HOST'] ) )
 
 define( 'SITE_DOMAIN', SITE_PROTOCOL.'://'.$_SERVER['HTTP_HOST'] );
 define( 'CURRENT_URL', SITE_DOMAIN.$_SERVER['REQUEST_URI'] );
+define( '_PATH', dirname(__FILE__).'/' );
 
 mb_internal_encoding( 'UTF-8' );
 date_default_timezone_set( 'UTC' );
 
-define( '_PATH', dirname(__FILE__).'/' );
-
-require _PATH.'core/autoloaders.php';
-require _PATH.'core/disk.php';
+require _PATH.'core/libs.php';
+require _PATH.'core/files.php';
 require _PATH.'core/functions.php';
 require _PATH.'core/http.php';
 require _PATH.'core/lang.php';
