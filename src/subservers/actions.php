@@ -127,6 +127,7 @@ class actions
 		 * Run the action and receive errors, if any.
 		 */
 		$errors = self::run_action( $action_name );
+		self::log( $action_name, $errors );
 		if( !empty( $errors ) ) {
 			warning( "Action '$action_name' errors: " . implode( '; ', $errors ) );
 		}
@@ -284,5 +285,24 @@ class actions
 		redirect( $url );
 	}
 
+	/*
+	 * Writes a record about the action to a log file.
+	 */
+	private static function log( $action_name, $errors )
+	{
+		if( !setting( 'log_actions' ) ) {
+			return;
+		}
+
+		$url = CURRENT_URL;
+		if( empty( $errors ) ) {
+			$status = 'OK';
+		}
+		else {
+			$status = count( $errors ) . ' errors';
+		}
+
+		log_message( "$action_name	$status	$url", 'actions' );
+	}
 }
 ?>
