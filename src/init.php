@@ -80,8 +80,7 @@ require _PATH.'core/vars.php';
 require _PATH.'subservers/pages.php';
 require _PATH.'subservers/actions.php';
 
-require _PATH.'ext/snippets.php';
-require _PATH.'ext/table.php';
+load_ext( 'snippets' );
 
 /*
  * PHP errors handler.

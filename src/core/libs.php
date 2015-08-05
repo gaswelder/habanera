@@ -14,11 +14,11 @@ function add_classes_dir( $dir ) {
 
 function load_ext( $name )
 {
-	$path = _PATH . 'ext/'.$name.'.php';
-	if( !file_exists( $path ) ) {
+	$path = _PATH . 'ext/'.$name;
+	if( !is_dir( $path ) ) {
 		fatal( "No extension '$name' ($path)" );
 	}
-	require $path;
+	require_dir( $path );
 }
 
 /*
