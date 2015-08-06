@@ -52,7 +52,7 @@ class req_url
 		if( $i >= count($this->args) ) {
 			return null;
 		}
-		return $this->args[$i];
+		return urldecode( $this->args[$i] );
 	}
 
 	function argsnum() {
