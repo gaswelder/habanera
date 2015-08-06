@@ -102,40 +102,23 @@ class mysql
 		}
 
 		$args = func_get_args();
-
-		/* First argument ($template) is a sprintf template and is
-		considered safe (without injections). All other arguments
-		($__args__) are to be escaped before passing to the sprintf
-		function. */
-
-		// If we have arguments, escape each of them.
-		$n = count( $args );
-		if( $n > 1 )
-		{
-			for( $i = 1; $i < $n; $i++ ) {
-				$args[$i] = $this->escape( $args[$i] );
-			}
-			$query = call_user_func_array( 'sprintf', $args );
-		}
+		$query = $this->build_query( $args );
 
 		$t = -microtime();
 		$r = $this->connection->query( $query );
 		$t += microtime();
 
-		// Reformat the query for display
-		$Q = preg_replace( "/\s+/u", " ", $query );
-
 		foreach( $this->onQuery as $f ){
-			call_user_func( $f, $Q, $t );
+			call_user_func( $f, $query, $t );
 		}
 
 		if( $r === false )
 		{
-			$error_message = $this->connection->error . '; query: '.$Q;
-			foreach( $this->onError as $f ){
+			$error_message = $this->connection->error . '; query: '.$query;
+			foreach( $this->onError as $f ) {
 				call_user_func( $f, $error_message );
 			}
-			return;
+			return $r;
 		}
 
 		if( !empty( $this->onWarning ) && $this->connection->warning_count )
@@ -145,7 +128,7 @@ class mysql
 			{
 				// The columns are "Level", "Code", "Message".
 				$msg = $warning['Message'];
-				$msg .= ' *** The query: ' . $Q;
+				$msg .= ' *** query: ' . $query;
 				foreach( $this->onWarning as $f ) {
 					call_user_func( $f, $msg );
 				}
@@ -153,6 +136,29 @@ class mysql
 		}
 
 		return $r;
+	}
+
+	private function build_query( $args )
+	{
+		/*
+		 * First argument ($template) is a sprintf template and is
+		 * considered safe (without injections). All other arguments
+		 * are to be escaped before passing to the sprintf function.
+		 */
+
+		/*
+		 * If there is only one argument, there is nothing to escape.
+		 */
+		$n = count( $args );
+		if( $n == 1 ) {
+			return $args[0];
+		}
+
+		for( $i = 1; $i < $n; $i++ ) {
+			$args[$i] = $this->escape( $args[$i] );
+		}
+
+		return call_user_func_array( 'sprintf', $args );
 	}
 
 	/* Escapes given value or array of values. */
@@ -273,7 +279,18 @@ class mysql
 		);
 	}
 
+	/*
+	 * Returns true if at least one record conforming to the given
+	 * filter exists in the given table.
+	 */
+	function exists( $table, $filter )
+	{
+		$table = $this->escape( $table );
 
+		$q = "SELECT 1 FROM `$table` WHERE "
+			. $this->buildCondition( $filter );
+		return (bool) $this->getValue( "SELECT EXISTS ($q)" );
+	}
 
 	/*
 	 * Updates records of the table with given name.

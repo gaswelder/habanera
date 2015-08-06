@@ -38,7 +38,7 @@ abstract class db_item
 	/*
 	 * This flag is set to true if there is no row with the given id.
 	 */
-	private $invalid = false;
+	private $exists = null;
 
 	/*
 	 * Data cache.
@@ -65,6 +65,7 @@ abstract class db_item
 	{
 		if( $item_id === null )
 		{
+			$this->exists = false;
 			if( $preload != '' ) {
 				error( "trying to preload data ($preload) from undefined item_id" );
 			}
@@ -73,7 +74,7 @@ abstract class db_item
 
 		if( !is_numeric( $item_id ) ) {
 			error( 'item_id passed to constructor ('.$item_id.') has wrong type ('.gettype( $item_id ).')' );
-			$this->invalid = true;
+			$this->exists = false;
 			return;
 		}
 
@@ -93,15 +94,26 @@ abstract class db_item
 		);
 
 		if( !$data ) {
-			$this->invalid = true;
+			$this->exists = false;
 		}
 		else {
 			$this->data = $data;
+			$this->exists = true;
 		}
 	}
 
-	public function id(){
+	function id() {
 		return $this->id;
+	}
+
+	function exists()
+	{
+		if( $this->exists === null )
+		{
+			$this->exists = DB::exists( $this->table_name,
+				array( $this->table_key => $this->id ) ) ? true : false;
+		}
+		return $this->exists;
 	}
 
 	/*
@@ -133,11 +145,18 @@ abstract class db_item
 
 	private function get( $key )
 	{
+		/*
+		 * Check the cache.
+		 */
 		if( array_key_exists( $key, $this->data ) ) {
 			return $this->data[$key];
 		}
 
-		if( !$this->id || $this->invalid ) {
+		/*
+		 * If we know that the record doesn't exist, don't bother.
+		 * But we may not know that yet.
+		 */
+		if( $this->exists === false ) {
 			return null;
 		}
 
@@ -151,7 +170,7 @@ abstract class db_item
 			$this->id
 		);
 		if( !$r ) {
-			$this->invalid = true;
+			$this->exists = false;
 			return null;
 		}
 
@@ -199,7 +218,7 @@ abstract class db_item
 			return $this->data_utc[$name];
 		}
 
-		if( !$this->id || $this->invalid ) {
+		if( $this->exists === false ) {
 			return null;
 		}
 
@@ -209,7 +228,7 @@ abstract class db_item
 			WHERE $this->table_key = %d",
 			$this->id );
 		if( !$r ) {
-			$this->invalid = true;
+			$this->exists = false;
 			return null;
 		}
 

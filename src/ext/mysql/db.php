@@ -75,6 +75,11 @@ class DB
 		return self::proxy( 'getRecords', $args );
 	}
 
+	static function exists( $table, $filter ) {
+		$args = func_get_args();
+		return self::proxy( 'exists', $args );
+	}
+
 	static function updateRecord( $query, $__args__ = null ){
 		$args = func_get_args();
 		return self::proxy( 'updateRecord', $args );
