@@ -9,11 +9,6 @@ function error( $message ) {
 	trigger_error( $message );
 }
 
-function fatal( $message ) {
-	log_message( 'Fatal: '.$message, 'errors' );
-	die( $message );
-}
-
 function parse_template( $path, $variables = array() ) {
 	$__path = $path;
 	extract( $variables );

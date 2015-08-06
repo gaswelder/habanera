@@ -16,7 +16,7 @@ function load_ext( $name )
 {
 	$path = _PATH . 'ext/'.$name;
 	if( !is_dir( $path ) ) {
-		fatal( "No extension '$name' ($path)" );
+		error( "No extension '$name' ($path)" );
 	}
 	require_dir( $path );
 }

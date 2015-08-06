@@ -86,11 +86,11 @@ class h2
 	static function set_url_proc( $func )
 	{
 		if( self::$preprocess_func != null ) {
-			fatal( "URL preprocess function is already registered." );
+			error( "URL preprocess function is already registered." );
 			return;
 		}
 		if( !is_callable( $func ) ) {
-			fatal( "URL preprocess function is not callable" );
+			error( "URL preprocess function is not callable" );
 			return;
 		}
 		self::$preprocess_func = $func;
@@ -115,7 +115,7 @@ class h2
 	static function add_subserver( $func )
 	{
 		if( !is_callable( $func ) ) {
-			fatal( "Given subserver function is not callable" );
+			error( "Given subserver function is not callable" );
 			return false;
 		}
 		array_unshift( self::$serve_functions, $func );
