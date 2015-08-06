@@ -4,6 +4,10 @@ function setting( $name, $default = null ) {
 	return settings::get( $name, $default );
 }
 
+function debug() {
+	return setting( 'debug' );
+}
+
 class settings
 {
 	/*

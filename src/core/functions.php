@@ -1,6 +1,9 @@
 <?php
 
 function warning( $message ) {
+	if( debug() ) {
+		error( $message );
+	}
 	log_message( 'Warning: '.$message, 'errors' );
 }
 
