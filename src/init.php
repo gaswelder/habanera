@@ -5,20 +5,24 @@ define( '_PATH', dirname(__FILE__).'/' );
 /*
  * APP_DIR is the read-only directory where application files are
  * stored: templates, configuration files, static data and other source
- * files. If the application doesn't define it, we set to to "appfiles".
- * The directory must be secured in a way that its contents can't be
- * accessed through HTTP.
+ * files. If the application doesn't define it, it is set to "appfiles".
+ * The directory must not be accessible through HTTP.
  */
 if( !defined( 'APP_DIR' ) ) {
 	define( 'APP_DIR', 'appfiles/' );
 }
 
+/*
+ * WRITE_DIR is a directory in which the script will be writing some
+ * working files like cache files or logs. It must not be accessible
+ * through HTTP.
+ */
 if( !defined( 'WRITE_DIR' ) ) {
 	define( 'WRITE_DIR', APP_DIR.'tmp/' );
 }
 
 /*
- * SITE_ROOT is actually a prefix to add to all site URLs. Most times
+ * SITE_ROOT is a prefix added to all site URLs. Most times
  * this is a single backslash, but if the site is placed in a
  * subdirectory, SITE_ROOT has to specify that subdirectory.
  */

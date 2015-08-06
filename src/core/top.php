@@ -1,12 +1,15 @@
 <?php
 
+/*
+ * Set a function to preprocess the URL before calling subservers.
+ */
 function set_url_proc( $func ) {
 	h2::set_url_proc( $func );
 }
 
 /*
- * Register a subserver: a functions which takes a req_url object and
- * returns true is it has served the content.
+ * Register a subserver: a function which takes a req_url object and
+ * returns true if it has served the content.
  */
 function add_subserver( $func ) {
 	h2::add_subserver( $func );
