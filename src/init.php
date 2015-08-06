@@ -1,4 +1,7 @@
 <?php
+
+define( '_PATH', dirname(__FILE__).'/' );
+
 /*
  * APP_DIR is the read-only directory where application files are
  * stored: templates, configuration files, static data and other source
@@ -41,26 +44,22 @@ if( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) {
 	define( 'SITE_PROTOCOL', 'http' );
 }
 
+require _PATH.'core/raw/output.php';
+require _PATH.'core/raw/errors.php';
+
 /*
  * We need to know the hostname to create URLs. It is in the HTTP_HOST
  * header. If it is not there, then we are most likely dealing with some
  * shady script making queries because all web browsers and most bots
  * support HTTP 1.1 nowadays.
  */
-if( !isset( $_SERVER['HTTP_HOST'] ) )
-{
-	$s = date( 'Y.m.d H:i:s' )
-		."\tNo host given in the request"
-		."\t".USER_AGENT
-		."\t".$_SERVER['REMOTE_ADDR']
-		."\t".$_SERVER['REQUEST_URI'];
-	error_log( $s );
-	error_bad_request();
+if( !isset( $_SERVER['HTTP_HOST'] ) ) {
+	fail( "No host given in the request" );
 }
+
 
 define( 'SITE_DOMAIN', SITE_PROTOCOL.'://'.$_SERVER['HTTP_HOST'] );
 define( 'CURRENT_URL', SITE_DOMAIN.$_SERVER['REQUEST_URI'] );
-define( '_PATH', dirname(__FILE__).'/' );
 
 mb_internal_encoding( 'UTF-8' );
 date_default_timezone_set( 'UTC' );
@@ -68,8 +67,6 @@ date_default_timezone_set( 'UTC' );
 require _PATH.'core/libs.php';
 require _PATH.'core/files.php';
 require _PATH.'core/functions.php';
-require _PATH.'core/http.php';
-require _PATH.'core/lang.php';
 require _PATH.'core/logs.php';
 require _PATH.'core/req_url.php';
 require _PATH.'core/settings.php';
@@ -81,15 +78,6 @@ require _PATH.'subservers/pages.php';
 require _PATH.'subservers/actions.php';
 
 load_ext( 'snippets' );
-
-/*
- * PHP errors handler.
- */
-function _error( $type, $msg, $file, $line, $context ) {
-	error( "$msg -- $file:$line" );
-	error_server();
-}
-set_error_handler( '_error' );
 
 add_classes_dir( APP_DIR.'classes' );
 if( file_exists( APP_DIR.'init.php' ) ) {
