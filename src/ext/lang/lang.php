@@ -12,14 +12,24 @@ function t( $text ) {
 	return lang::get_message( $text );
 }
 
+lang::init();
+
 /*
  * Gettext turned out to be too complicated and unreliable on one
  * hosting. This is a simpler alternative.
  */
 class lang
 {
-	static $lang = null;
+	private static $lang = null;
 	private static $dicts = array();
+
+	/*
+	 * When the extension is included, set the default language from
+	 * the settings.
+	 */
+	static function init() {
+		self::$lang = setting( 'lang' );
+	}
 
 	static function set_default_language( $lang ) {
 		self::$lang = $lang;
