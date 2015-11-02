@@ -40,16 +40,40 @@ class settings
 
 		self::$data = array();
 
-		$path = APP_DIR.'settings.ini';
-		if( file_exists( $path ) ) {
-			self::$data = array_merge( self::$data, parse_ini_file( $path ) );
-		}
+		/*
+		 * Load the default settings file, if it is present, and then
+		 * load all settings specific to the host.
+		 */
+		self::load( 'settings.ini' );
+		self::load_specifics();
+	}
 
-		$h = strtolower( php_uname( 'n' ) );
-		$path = APP_DIR.'settings-'.$h.'.ini';
-		if( file_exists( $path ) ) {
-			self::$data = array_merge( self::$data, parse_ini_file( $path ) );
+	/*
+	 * Host-specific file name has form
+	 * "settings.<host name postfix>.ini".
+	 * For host "foo.example.com" these files will be loaded
+	 * (if present) in this sequence:
+	 * settings.com, settings.example.com, settings.foo.example.com.
+	 */
+	private static function load_specifics()
+	{
+		$host = explode( '.', $_SERVER['HTTP_HOST'] );
+		$n = count( $host );
+		$postfix = '';
+		for( $i = $n-1; $i >= 0; $i-- ) {
+			$postfix = '.'.$host[$i].$postfix;
+			self::load( 'settings'.$postfix.'.ini' );
 		}
+	}
+
+	private static function load( $path )
+	{
+		$path = APP_DIR.$path;
+		if( !file_exists( $path ) ) {
+			return false;
+		}
+		self::$data = array_merge( self::$data, parse_ini_file( $path ) );
+		return true;
 	}
 }
 
