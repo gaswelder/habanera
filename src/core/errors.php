@@ -13,9 +13,16 @@ function on_error( $func ) {
 	_error_handlers::add( $func );
 }
 
-function fail( $msg ) {
-	trigger_error( $msg );
-	exit;
+function warning( $message ) {
+	if( debug() ) {
+		error( $message );
+	}
+	log_message( 'Warning: '.$message, 'errors' );
+}
+
+function error( $message ) {
+	log_message( 'Error: '.$message, 'errors' );
+	trigger_error( $message );
 }
 
 class _error_handlers

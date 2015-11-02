@@ -30,7 +30,6 @@ class uploads
 		}
 
 		$files = self::get_files( $input_name );
-
 		$accepted = array();
 
 		foreach( $files as $file )
@@ -39,7 +38,7 @@ class uploads
 			if( !$path ) {
 				continue;
 			}
-			$accepted[] = $file;
+			$accepted[] = $path;
 		}
 
 		return $accepted;
@@ -89,7 +88,7 @@ class uploads
 
 		$ext = strtolower( self::ext( $file['name'] ) );
 
-		if( $ext && !preg_match( '^.[a-z0-9\-_]+$', $ext ) ) {
+		if( $ext && !preg_match( '/^.[a-z0-9\-_]+$/', $ext ) ) {
 			warning( "Unacceptable file extension: $file[name]" );
 			return null;
 		}

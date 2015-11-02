@@ -48,26 +48,11 @@ if( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) {
 	define( 'SITE_PROTOCOL', 'http' );
 }
 
-require _PATH.'core/raw/output.php';
-require _PATH.'core/raw/errors.php';
-
-/*
- * We need to know the hostname to create URLs. It is in the HTTP_HOST
- * header. If it is not there, then we are most likely dealing with some
- * shady script making queries because all web browsers and most bots
- * support HTTP 1.1 nowadays.
- */
-if( !isset( $_SERVER['HTTP_HOST'] ) ) {
-	fail( "No host given in the request" );
-}
-
-
-define( 'SITE_DOMAIN', SITE_PROTOCOL.'://'.$_SERVER['HTTP_HOST'] );
-define( 'CURRENT_URL', SITE_DOMAIN.$_SERVER['REQUEST_URI'] );
-
 mb_internal_encoding( 'UTF-8' );
 date_default_timezone_set( 'UTC' );
 
+require _PATH.'core/output.php';
+require _PATH.'core/errors.php';
 require _PATH.'core/libs.php';
 require _PATH.'core/files.php';
 require _PATH.'core/functions.php';
@@ -78,15 +63,29 @@ require _PATH.'core/top.php';
 require _PATH.'core/user.php';
 require _PATH.'core/vars.php';
 
+/*
+ * We need to know the hostname to create URLs. It is in the HTTP_HOST
+ * header. If it is not there, then we are most likely dealing with some
+ * shady script making queries because all web browsers and most bots
+ * support this header.
+ */
+if( !isset( $_SERVER['HTTP_HOST'] ) ) {
+	warning( "No host given in the request" );
+	error_not_found();
+}
+
+define( 'SITE_DOMAIN', SITE_PROTOCOL.'://'.$_SERVER['HTTP_HOST'] );
+define( 'CURRENT_URL', SITE_DOMAIN.$_SERVER['REQUEST_URI'] );
+
 require _PATH.'subservers/pages.php';
 require _PATH.'subservers/actions.php';
-
-load_ext( 'snippets' );
 
 add_classes_dir( APP_DIR.'classes' );
 if( file_exists( APP_DIR.'init.php' ) ) {
 	require APP_DIR.'init.php';
 }
+
+load_ext( 'snippets' );
 
 h2::process( CURRENT_URL );
 ?>
