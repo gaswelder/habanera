@@ -1,0 +1,123 @@
+html {
+	background: #f0f0f0;
+}
+
+body {
+	padding: 1cm 3cm;
+	font-family: sans-serif;
+	font-size: 11pt;
+	line-height: 1.5em;
+	width: 36em;
+	margin: auto;
+	background: white;
+}
+
+
+h1 {
+	font-size: 11pt;
+}
+
+h2, h3 {
+	font-size: 10pt;
+}
+
+article {
+	margin-bottom: 3em;
+}
+
+code {
+	font-size: 10pt;
+}
+
+p + code {
+	margin: 1em;
+}
+
+article article h1 {
+	font-size: 10pt;
+}
+
+article section h1 {
+	font-size: 10pt;
+}
+
+table {
+	min-width: 50%;
+	margin: 1em 0 2em;
+	border-spacing: 0;
+}
+
+table caption {
+	font-size: 10pt;
+	font-weight: bold;
+	text-align: left;
+	margin-bottom: 0.5em;
+}
+
+td {
+	padding: 0 0.5em 0.2em;
+	vertical-align: top;
+}
+
+th {
+	text-align: left;
+}
+
+td:first-child {
+	padding-left: 0;
+}
+table.dl td:first-child {
+	font-weight: bolder;
+	font-size: 10pt;
+}
+
+
+.tab {
+	display: inline-block;
+	margin-left: 2em;
+}
+
+dt {
+	font-weight: bolder;
+	font-size: 90%;
+	display: inline;
+}
+dd:after {
+	content: "";
+	display: block;
+}
+dt:after {
+	content: ":";
+}
+
+dd {
+	margin-left: 0.2em;
+	margin-bottom: 0.5em;
+	display: inline;
+}
+
+ul, ol {
+	padding: 0;
+	margin-left: 1.5em;
+}
+
+
+.command > h1 {
+	font-size: 10pt;
+}
+.command > h1:before {
+	content: "\2022";
+	margin-right: 0.3em;
+}
+.command {
+	margin: 2em 0 1em;
+}
+
+.toc {
+	margin: 0 0 4em;
+}
+.toc > ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}

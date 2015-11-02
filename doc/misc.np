@@ -1,0 +1,29 @@
+h2
+
+The script foo will be called for all URLs "foo[/...]" (if there will be no closer match). This means, all URLs will be matched by at least the home page (as every URL starts with "/"). In the "flat" model we would have to dispatch further from the script foo, or mess with URL schemes.
+
+This is a simpler alternative, but its price is accepting lots of false matches or checking the depth in each page script manually. Checking is not such a big problem, if it is wrapped in a function:
+
+limit_args($min = 0, $max = 0, $allow_empty = true)
+{
+	$n = $req->argsnum();
+	
+	if( $n < $min || $n > $max ) {
+		error_notfound();
+	}
+}
+
+limit_args(); // this is the index page, dammit!
+
+
+
+send_mail( $to, $message )
+
+mail_message( $to, $message, $subject )
+mail_template( $to, $tplname, $vars, $subject )
+
+
+* How to link to another language then?
+- Let the url function have optional second parameter with dict of application-specific arguments?
+	url( '../overview', array( 'lang' => 'en' ) );
+
