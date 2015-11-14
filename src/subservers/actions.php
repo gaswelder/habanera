@@ -282,7 +282,7 @@ class actions
 			$url .= $k . '=' . urlencode( $v );
 		}
 
-		redirect( $url );
+		redirect( $url, 303 );
 	}
 
 	/*

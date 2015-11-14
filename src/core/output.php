@@ -30,9 +30,9 @@ function e( $var )
  * Makes a non-permanent redirect to the given URL.
  * The URL must be full.
  */
-function redirect( $url ) {
+function redirect( $url, $code = 302 ) {
 	error_log( "Redirect: $url" );
-	http_w::show_status( 302 );
+	http_w::show_status( $code );
 	header( "Location: ".$url );
 	exit;
 }
@@ -134,6 +134,7 @@ class http_w
 	{
 		$codes = array(
 			'302' => 'Found',
+			'303' => 'See Other',
 			'400' => 'Bad Request',
 			'403' => 'Forbidden',
 			'404' => 'Not Found',
