@@ -22,22 +22,42 @@ class mails
 		log_message( "$address	$title", 'send_mail' );
 
 		// development mock
-		if( setting( 'debug' ) )
-		{
-			$bom = "\xEF\xBB\xBF";
-			$path = time().'_'.uniqid().'.txt';
-			file_put_contents( APP_DIR.$path, $bom."To: $address\r\nSubject: $title\r\n\r\n$body" );
-			return true;
+		if( setting( 'debug' ) ) {
+			return self::mock_send( $address, $body, $title, $add_headers );
 		}
+		else {
+			return self::real_send( $address, $body, $title, $add_headers );
+		}
+	}
 
+	private static function mock_send( $address, $body, $title, $headers )
+	{
+		$bom = "\xEF\xBB\xBF";
+		$path = time().'_'.uniqid().'.txt';
+		$headers['To'] = $address;
+		$headers['Subject'] = $title;
+
+		$src = $bom;
+		foreach( $headers as $k => $v ) {
+			$src .= "$k: $v\r\n";
+		}
+		$src .= "\r\n" . $body;
+		file_put_contents( APP_DIR.$path, $src );
+		return true;
+	}
+
+	private static function real_send( $address, $body, $title, $add_headers )
+	{
 		$headers = array(
 			'Content-Type: text/plain; charset="UTF-8"',
 			'Date: '.date( 'r' )
 		);
 
-		/* On Windows "From" header in the form of
-		"User name <user-address>" gets transformed to
-		"<User name <user-address>>". */
+		/*
+		 * On Windows "From" header in the form of
+		 * "User name <user-address>" gets transformed to
+		 * "<User name <user-address>>".
+		 */
 
 		if( !isset( $add_headers['From'] ) ) {
 			$headers[] = "From: noreply@$_SERVER[HTTP_HOST]";
