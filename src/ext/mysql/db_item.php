@@ -232,12 +232,17 @@ abstract class db_item
 			return null;
 		}
 
-		$this->data_utc[$name] = $r['t'];
+		$this->data_utc[$name] = intval( $r['t'] );
 		return $this->data_utc[$name];
 	}
 
 	private function utc_set( $name, $time )
 	{
+		if( !is_numeric( $time ) ) {
+			trigger_error( "Invalid UTC value: $time" );
+			return;
+		}
+		$time = intval( $time );
 		$this->data_utc[$name] = $time;
 		$this->update_utc[$name] = $time;
 	}
