@@ -114,28 +114,6 @@ class http_w
 	 */
 	static function show_error( $errno )
 	{
-		/*
-		 * 401 is excluded because it requires some nontrivial actions
-		 * from us.
-		 */
-		$errors = array(
-			'400' => 'Bad Request',
-			'403' => 'Forbidden',
-			'404' => 'Not Found',
-			'410' => 'Gone',
-			'500' => 'Internal Server Error'
-		);
-
-		/*
-		 * If error number is unknown, resort to internal error.
-		 */
-		if( !isset( $errors[$errno] ) ) {
-			warning( "Unknown HTTP error number: $errno" );
-			$errno = '500';
-		}
-
-		$errstr = $errors[$errno];
-
 		$s = self::get_error_page( $errno );
 		if( !$s ) $s = $errstr;
 
@@ -145,12 +123,31 @@ class http_w
 		);
 
 		ob_destroy();
-
-		header( "$_SERVER[SERVER_PROTOCOL] $errno $errstr" );
+		self::show_status( $errno );
 		echo $s;
 		exit;
 	}
 
+	static function show_status( $code )
+	{
+		$codes = array(
+			'400' => 'Bad Request',
+			'403' => 'Forbidden',
+			'404' => 'Not Found',
+			'410' => 'Gone',
+			'500' => 'Internal Server Error'
+		);
+
+		/*
+		 * If code number is unknown, resort to internal error.
+		 */
+		if( !isset( $codes[$code] ) ) {
+			error( "Unknown HTTP error number: $code" );
+		}
+
+		$str = $codes[$code];
+		header( "$_SERVER[SERVER_PROTOCOL] $code $str" );
+	}
 }
 
 ?>
