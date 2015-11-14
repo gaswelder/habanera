@@ -27,10 +27,12 @@ function e( $var )
 }
 
 /*
- * Makes a redirect to the given URL. The URL should be full.
+ * Makes a non-permanent redirect to the given URL.
+ * The URL must be full.
  */
 function redirect( $url ) {
 	error_log( "Redirect: $url" );
+	http_w::show_status( 302 );
 	header( "Location: ".$url );
 	exit;
 }
@@ -131,6 +133,7 @@ class http_w
 	static function show_status( $code )
 	{
 		$codes = array(
+			'302' => 'Found',
 			'400' => 'Bad Request',
 			'403' => 'Forbidden',
 			'404' => 'Not Found',
