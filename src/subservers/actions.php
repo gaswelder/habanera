@@ -7,18 +7,20 @@
 add_subserver( 'actions::serve_action' );
 
 /*
- * Declare an action and define its access list.
+ * Declare an action and define its access list and function.
  * $users is a comma-separated list of user types.
  * Set to 'all' to allow access to everybody.
  */
-function declare_action( $name, $users = null )
+function declare_action( $name, $users, $func )
 {
-	if( !$users ) {
-		warning( "Action '$name' is declared without any access" );
-		$users = '';
+	if( isset( actions::$funcs[$name] ) ) {
+		trigger_error( "Action '$name' is already defined" );
+		return;
 	}
+
 	$list = array_map( 'trim', explode( ',', $users ) );
-	actions::$actions[$name] = $list;
+	actions::$users[$name] = $list;
+	actions::$funcs[$name] = $func;
 }
 
 /*
@@ -91,10 +93,11 @@ class actions
 	const ACTION_ID = 'aid';
 
 	/*
-	 * Access list.
-	 * action name => array of user types
+	 * action name => array of user types.
+	 * action name => function to call.
 	 */
-	static $actions = array();
+	static $users = array();
+	static $funcs = array();
 
 	static function serve_action( $req )
 	{
@@ -156,7 +159,7 @@ class actions
 		foreach( $paths as $path )
 		{
 			require( $path );
-			if( isset( self::$actions[$action_name] ) ) {
+			if( isset( self::$funcs[$action_name] ) ) {
 				return true;
 			}
 		}
@@ -169,7 +172,7 @@ class actions
 	 */
 	private static function action_allowed( $action_name, $user_type )
 	{
-		$list = self::$actions[$action_name];
+		$list = self::$users[$action_name];
 		foreach( $list as $type )
 		{
 			if( $type == 'all' || $user_type == $user_type ){
@@ -181,10 +184,10 @@ class actions
 
 	private static function run_action( $action_name )
 	{
-		$func = str_replace( '-', '_', $action_name );
-		if( !function_exists( $func ) ) {
+		if( !isset( self::$funcs[$action_name] ) ) {
 			error( "Action function doesn't exist: '$func'" );
 		}
+		$func = self::$funcs[$action_name];
 
 		/*
 		 * Turn on buffer in case errors start raining.

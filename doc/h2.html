@@ -37,6 +37,51 @@
 	</article>
 
 	<article>
+		<h1>Pages subserver</h1>
+
+		<p>Pages subserver is the default subserver which serves pages creating them from templates. Templates are stored in the "pages" directory of the application directory.</p>
+
+		<p>The URL path is mapped to the directories hierarchy inside the pages directory. If the request is /foo/bar, then the subserver will try to parse files pages/foo/bar.php, pages/foo/default.php, pages/foo.php, pages/default.php until one of them is found.</p>
+
+		<p>The trailing part of the URL will then be converted to the "arguments" accessible through the argv function. For example, if the request /foo/bar has resulted in the file pages/foo/default.php being called, then the arguments will be "default", "bar".</p>
+
+		<article class="command">
+			<h1>add_link</h1>
+			<p><code>add_link($rel, $href)</code></p>
+			<p>Adds a &lt;link&gt; element to the head section of the page, with rel and href attributes set to the given values.</p>
+		</article>
+
+		<article class="command">
+			<h1>add_js</h1>
+			<p><code>add_js($path)</code></p>
+			<p>The add_js function adds a reference to a JavaScript file. The path must be relative to the site root. References are added as &lt;script&gt; tags with the "src" attribute set to the URL inferred from the given path. The tags are added at the end of the page, before the closing &lt;/body&gt; tag.</p>
+		</article>
+
+		<article class="command">
+			<h1>add_css</h1>
+			<p><code>add_css($path)</code></p>
+			<p>The add_css function adds a reference to a stylesheet. The given path must be reltive to the site root. This function uses the add_link function internally with $rel set to "stylesheet", but the given path is transformed into an absolute URL.</p>
+		</article>
+	</article>
+
+	<article>
+		<h1>Actions subserver</h1>
+
+		<article class="command">
+			<h1>The <code>declare_action</code> function</h1>
+
+			<p class="disp"><code>declare_action(<var>$name</var>, <var>$users</var>, <var>$func</var>)</code></p>
+
+			<p>The <code>declare_action</code> function declares an action <var>name</var> and assigns <var>func</var> is the action function and <var>users</var> as the list of types of uses who can call that action.</p>
+
+			<p>The <var>users</var> variable should contain a comma-separated list of user types. If <code>all</code> is given, all user types will have access to the action.</p>
+		</article>
+	</article>
+</article>
+
+<article>
+	<h1>Library</h1>
+	<article>
 		<h1>Output</h1>
 
 		<article class="command">
@@ -246,34 +291,6 @@
 		</article>
 	</article>
 
-</article>
-
-<article>
-	<h1>Pages subserver</h1>
-
-	<p>Pages subserver is the default subserver which serves pages creating them from templates. Templates are stored in the "pages" directory of the application directory.</p>
-
-	<p>The URL path is mapped to the directories hierarchy inside the pages directory. If the request is /foo/bar, then the subserver will try to parse files pages/foo/bar.php, pages/foo/default.php, pages/foo.php, pages/default.php until one of them is found.</p>
-
-	<p>The trailing part of the URL will then be converted to the "arguments" accessible through the argv function. For example, if the request /foo/bar has resulted in the file pages/foo/default.php being called, then the arguments will be "default", "bar".</p>
-
-	<article class="command">
-		<h1>add_link</h1>
-		<p><code>add_link($rel, $href)</code></p>
-		<p>Adds a &lt;link&gt; element to the head section of the page, with rel and href attributes set to the given values.</p>
-	</article>
-
-	<article class="command">
-		<h1>add_js</h1>
-		<p><code>add_js($path)</code></p>
-		<p>The add_js function adds a reference to a JavaScript file. The path must be relative to the site root. References are added as &lt;script&gt; tags with the "src" attribute set to the URL inferred from the given path. The tags are added at the end of the page, before the closing &lt;/body&gt; tag.</p>
-	</article>
-
-	<article class="command">
-		<h1>add_css</h1>
-		<p><code>add_css($path)</code></p>
-		<p>The add_css function adds a reference to a stylesheet. The given path must be reltive to the site root. This function uses the add_link function internally with $rel set to "stylesheet", but the given path is transformed into an absolute URL.</p>
-	</article>
 </article>
 
 <article>
