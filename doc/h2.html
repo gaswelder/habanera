@@ -6,81 +6,104 @@
 <link rel="stylesheet" href="doc.css">
 </head>
 <body>
-	
+
 <h1>H2</h1>
 
 <article>
 	<h1>Core</h1>
-	
+
 	<article>
 		<h1>Subservers</h1>
 
-		<p>The core defines a "server" which takes requests from the actual web server and dispatches them to "subservers". It contains functionality sufficient to respond to requests and produce output, but lacks the actual subservers. The core also includes commonly used functions.</p>
+		<p>The core takes requests from the web server and dispatches them to its own "subservers". A "subserver" is a function which takes a request object, determines if it can fulfil it, and if it can, fulfils is.</p>
+
+		<p>The script will call all registered subserver functions in the order of their registration until one of them returns <code>true</code> or there are no more functions to call.</p>
+
+		<p>The core itself defines a "pages" subserver which will be called last and will try to serve a page by from the "pages" directory.</p>
 
 		<article class="command">
-			<h1>add_subserver</h1>
+			<h1>The <code>add_subserver</code> function</h1>
 
 			<p><code>add_subserver($func)</code></p>
 
-			<p>The add_subserver function adds the given function to a list of functions called to process each request. The function will receive a request object and will have to determine whether to process it. If the subserver function recognises the request and servies it, it must return true.</p>
+			<p>The <code>add_subserver</code> function adds the function <var>func</var> to a list of request processing functions. The <var>func</var> function must have form:</p>
 
-			<p>The server will call all registered subserver function in the order of their registration until one of them returns true.</p>
+			<p><code>$ok = $func($request)</code>.</p>
+
+			<p>If the function <var>func</var> will be called, it will receive a request object <var>request</var> and will have to determine whether to process it. If the function recognises the request and processes it, it must return <code>true</code>.</p>
+
+
 		</article>
 	</article>
-	
+
 	<article>
 		<h1>Output</h1>
-		
+
 		<article class="command">
-			<h1>redirect</h1>
+			<h1>The <code>redirect</code> function</h1>
+
 			<p><code>redirect($url)</code></p>
-			<p>The redirect function writes a "Location" header to the response to redirect the browser to the given URL. The current execution is stopped.</p>
+
+			<p>The <code>redirect</code> function writes appropriate HTTP headers to the output to redirect the browser to the given URL. The script execution is stopped after that.</p>
 		</article>
-		
+
 		<article class="command">
-			<h1>error_*</h1>
-			<p><code>error_&lt;type&gt;()</code></p>
-			<p>The error_* functions are a set of shortcuts to output a HTTP status header and show an error page.</p>
+			<h1>The error_* functions</h1>
+
+			<p><code>error_&lt;<i>type</i>&gt;()</code></p>
+
+			<p>The error_* functions output corresponding HTTP status header and error page.</p>
+
 			<table>
 				<tr>
-					<td>error_bad_request</td>
+					<th>Function</th>
+					<th>HTTP&nbsp;code</th>
+					<th>Meaning</th>
+				</tr>
+				<tr>
+					<td><code>error_bad_request</code></td>
 					<td>400</td>
+					<td></td>
 				</tr>
 				<tr>
 					<td>error_forbidden</td>
 					<td>403</td>
+					<td>Access denied. The client probably has to login.</td>
 				</tr>
 				<tr>
 					<td>error_notfound</td>
 					<td>404</td>
+					<td>Could not find the requested page.</td>
 				</tr>
 				<tr>
 					<td>error_gone</td>
 					<td>410</td>
+					<td>The page was removed.</td>
 				</tr>
 				<tr>
 					<td>error_server</td>
 					<td>500</td>
+					<td>We screwed up.</td>
 				</tr>
 			</table>
 		</article>
-	
+
 		<article class="command">
 			<h1>announce_*</h1>
 			announce_json($charset='UTF-8')
 			announce_txt($charset='UTF-8')
 			announce_html($charset='UTF-8')
 		</article>
-		
+
 		<article class="command">
 			<h1>announce_file</h1>
 			<p><code>announce_file($filename, $size=null)</code></p>
 		</article>
 	</article>
-	
+
 	<article>
 		<h1>Errors and logging</h1>
-		
+
 		<article class="command">
 			<h1>on_error</h1>
 		</article>
@@ -96,69 +119,69 @@
 			<p><code>warning($message)</code></p>
 			<p>Writes the message to the log. Intended to mark potential errors.</p>
 		</article>
-		
+
 		<article class="command">
 			<h1>log_message</h1>
 		</article>
 	</article>
-	
+
 	<article>
 		<h1>Loading components</h1>
-		
+
 		<article class="command">
 			<h1>lib</h1>
-			
+
 			<p><code>lib($name)</code></p>
 			<p>The lib function includes the file $name.php in the application's lib directory. This is a way to declaratively include libraries, typically used in application init scripts.</p>
 		</article>
-		
+
 		<article class="command">
 			<h1>add_classes_dir</h1>
 			<p><code>add_classes_dir($dir)</code></p>
 			<p>Adds the given directory to the list of directories searched by the classes autoloader.</p>
 		</article>
-		
+
 		<article class="command">
 			<h1>load_ext</h1>
-			
+
 			<p><code>load_ext($name)</code></p>
-			
+
 			<p>The load_ext function is similar to the lib function except the libraries are loaded from the ext directory of the h2 distribution.</p>
-			
+
 			<p>Many modules from the hall engine were moved to the ext directory because they are in most cases optional.</p>
 		</article>
-		
+
 		<article class="command">
 			<h1>require_dir</h1>
-			
+
 			<p><code>require_dir($path)</code></p>
-			
+
 			<p>The require_dir function includes all PHP files in the given directory, recursing into subdirectories. Some extensions which don't fit into a single file use that function to load themselves.</p>
 		</article>
 	</article>
-	
+
 	<article>
 		<h1>Debugging</h1>
 		<article class="command">
 			<h1>e</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>ob_destroy</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>msg</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>debug</h1>
 		</article>
 	</article>
-	
+
 	<article>
 		<h1>Configuration</h1>
-		
+
 		<article class="command">
 			<h1>setting</h1>
 		</article>
@@ -169,69 +192,69 @@
 		<article class="command">
 			<h1>vars::get</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>vars::post</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>vars::posts</h1>
 		</article>
 	</article>
-	
+
 	<article>
 		<h1>Writing files</h1>
-	
+
 		<article class="command">
 			<h1>files::save</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>files::get</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>files::append</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>files::time</h1>
 		</article>
 	</article>
-	
+
 	<article>
 		<h1>Sessions</h1>
-		
+
 		<article class="command">
 			<h1>user::auth</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>user::get_type</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>user::get_id</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>user::set_data</h1>
 		</article>
-		
+
 		<article class="command">
 			<h1>user::get_data</h1>
 		</article>
 	</article>
-	
+
 </article>
 
 <article>
 	<h1>Pages subserver</h1>
-	
+
 	<p>Pages subserver is the default subserver which serves pages creating them from templates. Templates are stored in the "pages" directory of the application directory.</p>
-	
+
 	<p>The URL path is mapped to the directories hierarchy inside the pages directory. If the request is /foo/bar, then the subserver will try to parse files pages/foo/bar.php, pages/foo/default.php, pages/foo.php, pages/default.php until one of them is found.</p>
-	
+
 	<p>The trailing part of the URL will then be converted to the "arguments" accessible through the argv function. For example, if the request /foo/bar has resulted in the file pages/foo/default.php being called, then the arguments will be "default", "bar".</p>
 
 	<article class="command">
@@ -255,33 +278,33 @@
 
 <article>
 	<h1>Configuration parameters</h1>
-	
+
 	Constants
 	APP_DIR
 	WRITE_DIR
 	SITE_ROOT
-	
-	
+
+
 	<table class="dl">
 		<tr>
 			<th>Parameter</th>
 			<th>Default</th>
 			<th>Description</th>
 		</tr>
-		
+
 		<tr>
 			<td>debug</td>
 			<td>0</td>
 			<td>Set to 1 to enable debugging checks. This will affect every function that checks for return value of the debug function. In particular, warnings will be treated as errors.</td>
 		</tr>
-		
-		
+
+
 		<tr>
 			<td>log_actions</td>
 			<td>0</td>
 			<td>Set to 1 to make the actions subserver write all successful actions to a log file.</td>
 		</tr>
-		
+
 		<tr>
 			<td>mysql_host</td>
 			<td>localhost</td>

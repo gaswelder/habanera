@@ -7,7 +7,7 @@ This is a simpler alternative, but its price is accepting lots of false matches 
 limit_args($min = 0, $max = 0, $allow_empty = true)
 {
 	$n = $req->argsnum();
-	
+
 	if( $n < $min || $n > $max ) {
 		error_notfound();
 	}

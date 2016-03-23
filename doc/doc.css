@@ -3,34 +3,38 @@ html {
 }
 
 body {
-	padding: 1cm 3cm;
+	padding: 2cm 4cm 1cm 3.6cm;
 	font-family: sans-serif;
 	font-size: 11pt;
-	line-height: 1.5em;
+	color: #222;
+	line-height: 1.3em;
 	width: 36em;
 	margin: auto;
 	background: white;
-}
-
-
-h1 {
-	font-size: 11pt;
-}
-
-h2, h3 {
-	font-size: 10pt;
 }
 
 article {
 	margin-bottom: 3em;
 }
 
-code {
-	font-size: 10pt;
+p + p {
+	margin: 1.3em 0;
 }
 
-p + code {
-	margin: 1em;
+h1 {
+	font-size: 12pt;
+}
+
+h2, h3 {
+	font-size: 11pt;
+}
+
+var, i {
+	font-family: serif;
+}
+
+code {
+	font-size: 10pt;
 }
 
 article article h1 {
@@ -66,39 +70,33 @@ th {
 td:first-child {
 	padding-left: 0;
 }
-table.dl td:first-child {
+
+dt {
 	font-weight: bolder;
-	font-size: 10pt;
+	font-size: 90%;
 }
 
+dd {
+	display: inline-block;
+	margin-left: 1em;
+	margin-bottom: 0.5em;
+}
+
+ul, ol {
+	padding: 0;
+	margin-left: 1.5em;
+}
 
 .tab {
 	display: inline-block;
 	margin-left: 2em;
 }
 
-dt {
-	font-weight: bolder;
-	font-size: 90%;
-	display: inline;
-}
-dd:after {
-	content: "";
-	display: block;
-}
-dt:after {
-	content: ":";
-}
-
-dd {
-	margin-left: 0.2em;
-	margin-bottom: 0.5em;
-	display: inline;
-}
-
-ul, ol {
-	padding: 0;
-	margin-left: 1.5em;
+/*
+ * "Display" paragraph.
+ */
+p.disp {
+	margin-left: 3em;
 }
 
 
@@ -120,4 +118,147 @@ ul, ol {
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
+}
+
+.comment {
+	font-size: smaller;
+	margin-top: -1em;
+	border-left: 0.2em dotted silver;
+	padding-left: 1em;
+}
+
+.problem:before {
+	content: "\26a0";
+	margin-right: .5em;
+}
+.problem {
+	font-size: smaller;
+}
+.item + .problem {
+	margin-top: -0.5em;
+	margin-bottom: 2em;
+}
+.item.done:after {
+	content: "\2713";
+	display: block;
+	position: absolute;
+	left: -2.5em;
+	top: 0em;
+}
+.item.not-done {
+	color: #c00;
+}
+
+
+/*
+ * Algorithms.
+ */
+.alg, .alg ol {
+	list-style-position: inside;
+}
+.alg li {
+	list-style-type: disc;
+}
+.alg li.if {
+	list-style-type: none;
+}
+
+body {
+	counter-reset: item;
+}
+
+.item {
+	position: relative;
+	counter-increment: item;
+	margin-bottom: 2em;
+}
+
+.item p + ul, .item p + ol {
+	margin-top: -1em;
+	list-style-position: inside;
+	margin-left: 0;
+	padding-left: 0;
+}
+
+.item:before {
+	content: counter(item);
+	position: absolute;
+	left: -4em;
+	margin: 0;
+	width: 3em;
+	text-align: right;
+	font-size: smaller;
+}
+
+.item .ref, .item .date {
+	font-size: 8pt;
+	margin-top: 0;
+	margin-bottom: 0;
+	line-height: 12pt;
+	color: gray;
+	font-style: italic;
+	display: none;
+}
+
+body.draft .item .ref, body.draft .item .date {
+	display: block;
+}
+
+.item p + .date {
+	margin-top: -1em;
+}
+
+@media print {
+	nav {
+		display: none;
+	}
+	.item .date {
+		display: none;
+	}
+	math {
+		font-family: "Cambria math";
+	}
+}
+
+a.footnote {
+	color: inherit;
+	text-decoration: inherit;
+
+}
+
+a.footnote:after {
+	content: counter(fncount);
+	counter-increment: fncount;
+	font-size: 8pt;
+	position: relative;
+	bottom: 0.5em;
+}
+
+p.footnote {
+	font-size: 9pt;
+	position: relative;
+}
+p.footnote:before {
+	content: counter(fncountf);
+	counter-increment: fncountf;
+	font-size: 8pt;
+	position: relative;
+	bottom: 0.5em;
+	margin-right: 0.2em;
+}
+p.footnote:after {
+	content: "";
+	border-top: thin solid #222;
+	width: 20em;
+	height: 2px;
+	position: absolute;
+	left: 0;
+	top: -1.5em;
+	margin-top: 1em;
+}
+p.footnote + p.footnote {
+	margin-top: 0;
+}
+p.footnote + p.footnote:after {
+	display: none;
 }

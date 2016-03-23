@@ -69,16 +69,19 @@ class pages
 	static $links = array();
 
 	static $scripts = array();
+
 	static function serve_page( $req )
 	{
 		if( $req->arg(0) == 'a' ) {
 			return false;
 		}
+
 		self::$req = $req;
 		$i = self::traverse( $req );
 		if( $i < 0 ) {
 			return false;
 		}
+
 		$path = self::filepath( $req );
 		if( !file_exists( $path ) ) {
 			return false;
