@@ -12,13 +12,17 @@ function add_classes_dir( $dir ) {
 	autoloaders::add_dir( $dir );
 }
 
-function load_ext( $name )
+function load_ext( $names__ )
 {
-	$path = _PATH . 'ext/'.$name;
-	if( !is_dir( $path ) ) {
-		error( "No extension '$name' ($path)" );
+	$args = func_get_args();
+	foreach( $args as $name )
+	{
+		$path = _PATH . 'ext/'.$name;
+		if( !is_dir( $path ) ) {
+			error( "No extension '$name' ($path)" );
+		}
+		require_dir( $path );
 	}
-	require_dir( $path );
 }
 
 /*
