@@ -63,7 +63,7 @@ class autoloaders
 
 	static function seek( $class )
 	{
-		$name = strtolower( $class ).'.php';
+		$name = $class . '.php';
 		foreach( self::$dirs as $path )
 		{
 			$p = $path.'/'.$name;
