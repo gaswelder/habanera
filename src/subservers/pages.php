@@ -262,7 +262,7 @@ class pages
 	 */
 	static function get_template( $name, $vars = array() )
 	{
-		$path = self::current_path() . '/' . $name . '.t';
+		$path = self::current_path() . '/' . $name . '.tpl';
 		return self::parse( $path, $vars );
 	}
 
