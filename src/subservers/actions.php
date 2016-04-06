@@ -107,7 +107,6 @@ class actions
 		if( $req->arg(0) != 'a' || $req->arg(2) ) {
 			return false;
 		}
-
 		self::run( $req->arg(1) );
 	}
 
@@ -175,7 +174,7 @@ class actions
 		$list = self::$users[$action_name];
 		foreach( $list as $type )
 		{
-			if( $type == 'all' || $user_type == $user_type ){
+			if( $type == 'all' || $type == $user_type ){
 				return true;
 			}
 		}

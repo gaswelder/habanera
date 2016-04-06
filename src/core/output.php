@@ -27,11 +27,10 @@ function e( $var )
 }
 
 /*
- * Makes a non-permanent redirect to the given URL.
+ * Makes a redirect to the given URL.
  * The URL must be full.
  */
 function redirect( $url, $code = 302 ) {
-	error_log( "Redirect: $url" );
 	http_w::show_status( $code );
 	header( "Location: ".$url );
 	exit;
@@ -57,15 +56,15 @@ function error_server() {
 	http_w::show_error( '500' );
 }
 
-function announce_json( $charset = 'UTF-8' ){
-	header( "Content-Type: application/json; charset=$charset" );
+function announce_json() {
+	header( "Content-Type: application/json; charset=UTF-8" );
 }
 
-function announce_txt( $charset = 'UTF-8' ){
+function announce_txt( $charset = 'UTF-8' ) {
 	header( "Content-Type: text/plain; charset=$charset" );
 }
 
-function announce_html( $charset = 'UTF-8' ){
+function announce_html( $charset = 'UTF-8' ) {
 	header( "Content-Type: text/html; charset=$charset" );
 }
 
@@ -116,14 +115,11 @@ class http_w
 	 */
 	static function show_error( $errno )
 	{
+		error_log( "HTTP error $errno" );
 		$s = self::get_error_page( $errno );
-		if( !$s ) $s = $errstr;
-
-		error_log( sprintf( "%s: %s -- %s -- %s",
-			$errstr, $_SERVER['REQUEST_URI'],
-			USER_AGENT, $_SERVER['REMOTE_ADDR'] )
-		);
-
+		if( !$s ) {
+			$s = "Error $errno";
+		}
 		ob_destroy();
 		self::show_status( $errno );
 		echo $s;

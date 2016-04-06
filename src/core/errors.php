@@ -17,11 +17,12 @@ function warning( $message ) {
 	if( debug() ) {
 		error( $message );
 	}
-	log_message( 'Warning: '.$message, 'errors' );
+	else {
+		log_message( 'Warning: '.$message, 'errors' );
+	}
 }
 
 function error( $message ) {
-	log_message( 'Error: '.$message, 'errors' );
 	trigger_error( $message );
 }
 

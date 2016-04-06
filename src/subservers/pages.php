@@ -1,6 +1,4 @@
 <?php
-
-
 /*
  * Set page <title>.
  */
@@ -16,7 +14,10 @@ function add_link( $rel, $href ) {
 	pages::$links[] = array( 'rel' => $rel, 'href' => $href );
 }
 
-function add_css( $href )
+/*
+ * Add CSS links to the page.
+ */
+function add_css( $href__ )
 {
 	$args = func_get_args();
 	foreach( $args as $href ) {

@@ -414,8 +414,6 @@ class mysql
 		return $condition;
 	}
 
-
-
 	private function tuple_string( $tuple )
 	{
 		$values = array();

@@ -55,7 +55,6 @@ class vars
 			self::$post[$k] = $v;
 		}
 
-		// TODO: do these need urldecode?
 		foreach( $_GET as $k => $v )
 		{
 			if( $mq ) {
