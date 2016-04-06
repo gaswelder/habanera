@@ -95,7 +95,8 @@ function getChildItems( container )
 		if( c.nodeType != c.ELEMENT_NODE ) {
 			continue;
 		}
-		if( c.tagName.toLowerCase() != 'article' ) {
+		if( c.tagName.toLowerCase() != 'article' &&
+			c.tagName.toLowerCase() != 'section' ) {
 			continue;
 		}
 		var item = getItem( c );

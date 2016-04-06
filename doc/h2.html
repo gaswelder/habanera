@@ -2,12 +2,60 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>H2</title>
+<title>H₂</title>
 <link rel="stylesheet" href="doc.css">
 </head>
 <body>
 
-<h1>H2</h1>
+<h1>H<sub>2</sub></h1>
+
+<article>
+	<h1>Pages</h1>
+
+	<p>Pages subserver is the default subserver which serves pages creating them from templates. Templates are stored in the "pages" directory of the application directory.</p>
+
+	<p>The URL path is mapped to the directories hierarchy inside the pages directory. If the request is /foo/bar, then the subserver will try to parse files pages/foo/bar.php, pages/foo/default.php, pages/foo.php, pages/default.php until one of them is found.</p>
+
+	<p>The trailing part of the URL will then be converted to the "arguments" accessible through the argv function. For example, if the request /foo/bar has resulted in the file pages/foo/default.php being called, then the arguments will be "default", "bar".</p>
+
+	<article class="command">
+		<h1>The <code>add_link</code> function</h1>
+
+		<p class="disp"><code>add_link(<var>$rel</var>, <var>$href</var>)</code></p>
+
+		<p>The <code>add_link</code> function adds a <code>&lt;link&gt;</code> element to the head section of the page, with <code>rel</code> and <code>href</code> attributes set to the given values.</p>
+	</article>
+
+	<article class="command">
+		<h1>add_js</h1>
+		<p><code>add_js($path)</code></p>
+		<p>The add_js function adds a reference to a JavaScript file. The path must be relative to the site root. References are added as &lt;script&gt; tags with the "src" attribute set to the URL inferred from the given path. The tags are added at the end of the page, before the closing &lt;/body&gt; tag.</p>
+	</article>
+
+	<article class="command">
+		<h1>The <code>add_css</code> function</h1>
+
+		<p class="disp"><code>add_css(<var>$path</var>, ...)</code></p>
+
+		<p>The <code>add_css</code> function adds references to given stylesheets. The given paths must be relative to the site root.</p>
+
+		<p>The references are added as <code>link</code> tags in the <code>head</code> section of the generated page. The function may be called at any time during the generation of the page.</p>
+	</article>
+</article>
+
+<article>
+	<h1>Actions subserver</h1>
+
+	<article class="command">
+		<h1>The <code>declare_action</code> function</h1>
+
+		<p class="disp"><code>declare_action(<var>$name</var>, <var>$users</var>, <var>$func</var>)</code></p>
+
+		<p>The <code>declare_action</code> function declares an action <var>name</var> and assigns <var>func</var> is the action function and <var>users</var> as the list of types of uses who can call that action.</p>
+
+		<p>The <var>users</var> variable should contain a comma-separated list of user types. If <code>all</code> is given, all user types will have access to the action.</p>
+	</article>
+</article>
 
 <article>
 	<h1>Core</h1>
@@ -33,48 +81,6 @@
 			<p>If the function <var>func</var> will be called, it will receive a request object <var>request</var> and will have to determine whether to process it. If the function recognises the request and processes it, it must return <code>true</code>.</p>
 
 
-		</article>
-	</article>
-
-	<article>
-		<h1>Pages subserver</h1>
-
-		<p>Pages subserver is the default subserver which serves pages creating them from templates. Templates are stored in the "pages" directory of the application directory.</p>
-
-		<p>The URL path is mapped to the directories hierarchy inside the pages directory. If the request is /foo/bar, then the subserver will try to parse files pages/foo/bar.php, pages/foo/default.php, pages/foo.php, pages/default.php until one of them is found.</p>
-
-		<p>The trailing part of the URL will then be converted to the "arguments" accessible through the argv function. For example, if the request /foo/bar has resulted in the file pages/foo/default.php being called, then the arguments will be "default", "bar".</p>
-
-		<article class="command">
-			<h1>add_link</h1>
-			<p><code>add_link($rel, $href)</code></p>
-			<p>Adds a &lt;link&gt; element to the head section of the page, with rel and href attributes set to the given values.</p>
-		</article>
-
-		<article class="command">
-			<h1>add_js</h1>
-			<p><code>add_js($path)</code></p>
-			<p>The add_js function adds a reference to a JavaScript file. The path must be relative to the site root. References are added as &lt;script&gt; tags with the "src" attribute set to the URL inferred from the given path. The tags are added at the end of the page, before the closing &lt;/body&gt; tag.</p>
-		</article>
-
-		<article class="command">
-			<h1>add_css</h1>
-			<p><code>add_css($path)</code></p>
-			<p>The add_css function adds a reference to a stylesheet. The given path must be reltive to the site root. This function uses the add_link function internally with $rel set to "stylesheet", but the given path is transformed into an absolute URL.</p>
-		</article>
-	</article>
-
-	<article>
-		<h1>Actions subserver</h1>
-
-		<article class="command">
-			<h1>The <code>declare_action</code> function</h1>
-
-			<p class="disp"><code>declare_action(<var>$name</var>, <var>$users</var>, <var>$func</var>)</code></p>
-
-			<p>The <code>declare_action</code> function declares an action <var>name</var> and assigns <var>func</var> is the action function and <var>users</var> as the list of types of uses who can call that action.</p>
-
-			<p>The <var>users</var> variable should contain a comma-separated list of user types. If <code>all</code> is given, all user types will have access to the action.</p>
 		</article>
 	</article>
 </article>
@@ -149,8 +155,20 @@
 	<article>
 		<h1>Errors and logging</h1>
 
-		<article class="command">
-			<h1>on_error</h1>
+		<article class="command" id="on_error">
+			<h1>The <code>on_error</code> function</h1>
+
+			<p class="disp"><code>on_error(<var>$func</var>)</code></p>
+
+			<p>The <code>on_error</code> function adds the given function <var>$func</var> to the list of functions called when errors occur. The last added function will be called first.</p>
+
+			<p>The function <var>func</var> must have form:</p>
+
+			<p class="disp"><code><var>$ok</var> = <var>$func</var>(<var>$msg</var>, <var>$line</var>)</code></p>
+
+			<p class="cont">where <var>$msg</var> is an error message and <var>$line</var> is a string in form "&lt;file&nbsp;path&gt;:&lt;line&nbsp;number&gt;" specifying the line where the error occured.</p>
+
+			<p>If <var>$func</var> returns <code>true</code>, the rest of the error functions will not be called.</p>
 		</article>
 
 		<article class="command">
@@ -186,22 +204,14 @@
 			<p>Adds the given directory to the list of directories searched by the classes autoloader.</p>
 		</article>
 
-		<article class="command">
-			<h1>load_ext</h1>
+		<article class="command" id="load_ext">
+			<h1>The <code>load_ext</code> function</h1>
 
-			<p><code>load_ext($name)</code></p>
+			<p class="disp"><code>load_ext(<var>$name</var>, ...)</code></p>
 
-			<p>The load_ext function is similar to the lib function except the libraries are loaded from the ext directory of the h2 distribution.</p>
+			<p>The <code>load_ext</code> function is similar to the <code>lib</code> function except the libraries are loaded from the extensions directory of the H<sub>2</sub> distribution.</p>
 
-			<p>Many modules from the hall engine were moved to the ext directory because they are in most cases optional.</p>
-		</article>
-
-		<article class="command">
-			<h1>require_dir</h1>
-
-			<p><code>require_dir($path)</code></p>
-
-			<p>The require_dir function includes all PHP files in the given directory, recursing into subdirectories. Some extensions which don't fit into a single file use that function to load themselves.</p>
+			<p>The extensions are different from libraries in that they interact with H<sub>2</sub> API.</p>
 		</article>
 	</article>
 
@@ -251,7 +261,11 @@
 		<h1>Writing files</h1>
 
 		<article class="command">
-			<h1>files::save</h1>
+			<h1><code>files::save</code></h1>
+
+			<p class="disp"><code><var>$ok</var> = files::save(<var>$dir</var>, <var>$name</var>, <var>$contents</var>)</code></p>
+
+			<p>Saves given contents to the file named <var>$name</var> in the directory <var>$dir</var>.</p>
 		</article>
 
 		<article class="command">
@@ -336,6 +350,15 @@
 
 </article>
 
+<section id="extensions">
+	<h1>Extensions</h1>
+
+	<article id="ext_debug">
+		<h1>The <code>ext_debug</code> extension</h1>
+
+		<p>The <code>ext_debug</code> extension catches all errors and outputs execution stacks terminating the script. It does nothing if the <code>debug</code> parameter is not set to <code>1</code>.</p>
+	</article>
+</section>
 
 <script src="toc.js?auto-id"></script>
 
