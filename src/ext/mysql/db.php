@@ -9,31 +9,18 @@ class DB
 	private static $db = null;
 
 	/*
-	 * Returns MySQL object connected using "mysql_*" settings.
+	 * Returns MySQL object.
 	 */
 	static function c()
 	{
 		if( self::$db ) return self::$db;
-
-		$host = settings::get( 'mysql_host' );
-		$user = settings::get( 'mysql_user' );
-		$pass = settings::get( 'mysql_pass' );
-		$dbname = settings::get( 'mysql_dbname' );
-
-		if( !$host ) {
-			error( 'Database connection parameters are not defined.' );
-			return false;
+		$url = setting( 'database' );
+		if( !$url ) {
+			error( "Missing 'database' parameter" );
+			return null;
 		}
-
-		try {
-			self::$db = new MySQL( $host, $user, $pass, $dbname, 'UTF-8' );
-		}
-		catch( Exception $e ) {
-			error( "MySQL exception: " . $e->getMessage() );
-		}
-
-		self::$db->add_error_callback( 'error' );
-		self::$db->add_warning_callback( 'warning' );
+		
+		self::$db = new __mysql( $url );
 		return self::$db;
 	}
 

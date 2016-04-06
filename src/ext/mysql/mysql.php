@@ -2,7 +2,7 @@
 /*
  * A high-level wrapper for MySQLi functions.
  */
-class mysql
+class __mysql
 {
 	private $connection = null; // mysqli instance
 
@@ -16,23 +16,17 @@ class mysql
 
 	private $connected = false;
 
-	private $onQuery = array();
-	private $onError = array();
-	private $onWarning = array();
-
-
-	function __construct( $addr, $user, $pass, $dbname = "",
-		$connection_charset = 'UTF8' )
+	function __construct( $url, $connection_charset = 'UTF8' )
 	{
-		$pos = strpos( $addr, ':' );
-		if( $pos !== false ) {
-			$host = substr( $addr, 0, $pos );
-			$port = substr( $addr, $pos + 1 );
-		}
-		else {
-			$host = $addr;
+		$url = parse_url( $url );
+
+		$host = $url['host'];
+		if( !isset( $url['port'] ) ) {
 			$port = null;
 		}
+		$user = $url['user'];
+		$pass = $url['pass'];
+		$dbname = basename( $url['path'] );
 
 		$this->host = $host;
 		$this->port = $port;
@@ -40,26 +34,17 @@ class mysql
 		$this->pass = $pass;
 		$this->dbname = $dbname;
 
-		/* The charset name is "UTF-8", but MySQL uses "UTF8". */
+		/*
+		 * The charset name is "UTF-8", but MySQL call it "UTF8".
+		 */
 		if( strtoupper( $connection_charset ) == 'UTF-8' ){
 			$connection_charset = 'UTF8';
 		}
 		$this->connection_charset = $connection_charset;
 	}
 
-	function add_query_callback( $callback ) {
-		$this->onQuery[] = $callback;
-	}
-	function add_warning_callback( $callback ) {
-		$this->onWarning[] = $callback;
-	}
-	function add_error_callback( $callback ) {
-		$this->onError[] = $callback;
-	}
-
 	function connect()
 	{
-		ob_start();
 		if( $this->port ) {
 			$this->connection = new mysqli( $this->host, $this->user,
 				$this->pass, $this->dbname, $this->port );
@@ -69,15 +54,25 @@ class mysql
 				$this->pass, $this->dbname );
 		}
 
-		$s = ob_get_clean();
-
-		if( mysqli_connect_error() ){
-			throw new Exception( "MySQL: could not connect to the host." );
+		if( mysqli_connect_error() ) {
+			trigger_error( "MySQL: could not connect to the host." );
+			return false;
 		}
 
 		$this->connected = true;
-		//$this->exec( "SET NAMES '$this->connection_charset'" );
 		mysqli_set_charset( $this->connection, $this->connection_charset );
+		return true;
+	}
+
+	function close()
+	{
+		if( !$this->connection ) {
+			trigger_error( "Can't close: no connection", E_USER_WARNING );
+			return false;
+		}
+		$ok = $this->connection->close();
+		$this->connection = null;
+		return null;
 	}
 
 	function checkConnection()
@@ -87,78 +82,127 @@ class mysql
 		}
 	}
 
-	/* Executes a mysql query using sprintf to substitute arguments.
-	Every argument is escaped before being passed to sprintf.
-	On error NULL is returned.
-	Example:
-		$mysql->exec( "UPDATE table SET field = %d
-			WHERE field2 = '%s'", 12, 'howdy, globe' );
+	/*
+	 * Executes a query using 'sprintf' to substitute arguments.
+	 * Every argument is escaped before being substituted.
+	 * Returns 'true' or a 'mysqli_result' object depending on the query.
+	 * Returns 'null' on error.
+	 *
+	 * Example:
+	 * 	$mysql->exec( "UPDATE table SET field = %d
+	 * 		WHERE field2 = '%s'", 12, 'howdy, globe' );
 	*/
-
-	function exec( $query, $_args_ = null )
+	function exec( $query, $args___ = null )
 	{
 		if( !$this->connected ) {
 			$this->connect();
 		}
 
 		$args = func_get_args();
-		$query = $this->build_query( $args );
-
-		$t = -microtime();
+		$query = $this->construct_query( $args );
 		$r = $this->connection->query( $query );
-		$t += microtime();
 
-		foreach( $this->onQuery as $f ){
-			call_user_func( $f, $query, $t );
+		return $this->check_result( $r, $query );
+	}
+
+	/*
+	 * Same as exec, but disables caching. Used for streaming.
+	 */
+	private function execs( $template, $args___ = null )
+	{
+		if( !$this->connected ) {
+			$this->connect();
 		}
+		$args = func_get_args();
+		$query = $this->constructQuery( $args );
+		$r = $this->connection->query( $query, MYSQLI_USE_RESULT );
+		return $this->check_result( $r, $query );
+	}
 
+	private function check_result( $r, $query )
+	{
 		if( $r === false )
 		{
-			$error_message = $this->connection->error . '; query: '.$query;
-			foreach( $this->onError as $f ) {
-				call_user_func( $f, $error_message );
-			}
-			return $r;
+			$Q = $this->display_query( $query );
+			$error_message = $this->connection->error . ':'.$Q;
+			trigger_error( $error_message, E_USER_ERROR );
+			return null;
 		}
 
-		if( !empty( $this->onWarning ) && $this->connection->warning_count )
+		if( $this->connection->warning_count )
 		{
 			$warnings = $this->getRecords( "SHOW WARNINGS" );
 			foreach( $warnings as $warning )
 			{
 				// The columns are "Level", "Code", "Message".
 				$msg = $warning['Message'];
-				$msg .= ' *** query: ' . $query;
-				foreach( $this->onWarning as $f ) {
-					call_user_func( $f, $msg );
-				}
+				$msg .= ' *** The query: ' . $Q;
+				trigger_error( $msg, E_USER_WARNING );
 			}
 		}
-
 		return $r;
 	}
 
-	private function build_query( $args )
+	private function display_query( $q )
 	{
-		/*
-		 * First argument ($template) is a sprintf template and is
-		 * considered safe (without injections). All other arguments
-		 * are to be escaped before passing to the sprintf function.
-		 */
+		$lines = preg_split( '/\r\n?/', $q );
 
 		/*
-		 * If there is only one argument, there is nothing to escape.
+		 * Calculate common indent.
 		 */
+		$indent = 999;
+		foreach( $lines as $line ) {
+			if( $line == "" ) continue;
+			$i = 0;
+			$n = strlen( $line );
+			while( $i < $n && $line[$i] == "\t" ) $i++;
+			if( $i < $indent ) $indent = $i;
+		}
+
+		/*
+		 * Remove the indent and add numbers.
+		 */
+		foreach( $lines as $i => $line ) {
+			$lines[$i] = ($i + 1) . "\t". substr( $line, $indent );
+		}
+		return "\n" . implode( "\n", $lines ) . "\n";
+	}
+
+	/*
+	 * Returns a stream object (see below) for the given query.
+	 */
+	function getStream( $template, $args = null )
+	{
+		$args = func_get_args();
+		$query = $this->construct_query( $args );
+		return new __mysql_stream( $this->execs( $query ) );
+	}
+
+	private function construct_query( $args )
+	{
 		$n = count( $args );
 		if( $n == 1 ) {
 			return $args[0];
 		}
-
+		/*
+		 * First argument ($template) is a sprintf template and is
+		 * considered safe (without injections). All other arguments
+		 * ($__args__) are to be escaped.
+		 */
 		for( $i = 1; $i < $n; $i++ ) {
 			$args[$i] = $this->escape( $args[$i] );
+			if( is_string( $args[$i] ) ) {
+				$args[$i] = str_replace( '%', '%%', $args[$i] );
+			}
 		}
-
 		return call_user_func_array( 'sprintf', $args );
+	}
+
+	function prepare( $query ) {
+		if( !$this->connected ) {
+			$this->connect();
+		}
+		return new __mysql_statement( $this->connection, $query );
 	}
 
 	/* Escapes given value or array of values. */
@@ -181,7 +225,7 @@ class mysql
 			$this->connection->real_escape_string( $var ) );
 	}
 
-	function insertId(){
+	function insertId() {
 		return $this->connection->insert_id;
 	}
 
@@ -241,7 +285,10 @@ class mysql
 		return $a;
 	}
 
-	/* Inserts a row into a table. */
+	/*
+	 * Inserts a row into a table.
+	 * Returns primary key of the inserted row.
+	 */
 	function insertRecord( $table, $record, $ignore = false )
 	{
 		$record = $this->escape( $record );
@@ -379,18 +426,6 @@ class mysql
 		return $this->deleteRecords( $table_name, $filter, null, 1 );
 	}
 
-	/*
-	 * Returns a stream object (see below) for the given query.
-	 */
-	function getStream( $mysql_query, $args = null )
-	{
-		$args = func_get_args();
-		if( count( $args ) > 1 ){
-			$mysql_query = $this->constructQuery( $mysql_query, $args );
-		}
-		return new mysql_stream( $this->exec( $mysql_query ) );
-	}
-
 	/* Creates condition clause for a query. */
 	function buildCondition( $filter )
 	{
@@ -434,44 +469,120 @@ class mysql
 	{
 		return '(`' . implode( "`, `", $header ) . '`)';
 	}
-
-	private function constructQuery( $template, $__args__ = null )
-	{
-		$args = func_get_args();
-		$n = count( $args );
-
-		/* First argument ($template) is a sprintf template and is
-		considered safe (without injections). All other arguments
-		($__args__) are to be escaped before passing to the sprintf
-		function. */
-
-		// If we have arguments, escape each of them.
-		if( $n > 1 )
-		{
-			for( $i = 1; $i < $n; $i++ ) {
-				$args[$i] = $this->escape( $args[$i] );
-			}
-		}
-		return call_user_func_array( 'sprintf', $args );
-	}
-
 }
 
-class mysql_stream
+class __mysql_stream
 {
 	private $result;
 
-	public function __construct( $result ){
+	function __construct( $result ) {
 		$this->result = $result;
 	}
 
-	public function getRecord(){
+	function __destruct() {
+		$this->free();
+	}
+
+	function free() {
+		if( $this->result ) {
+			$this->result->free();
+			$this->result = null;
+		}
+	}
+
+	function getRecord() {
 		return $this->result->fetch_assoc();
 	}
 
-	public function getValue(){
+	function getValue() {
 		$r = $this->result->fetch_row();
 		return $r[0];
+	}
+}
+
+class __mysql_statement
+{
+	private $s;
+
+	function __construct( $conn, $query ) {
+		$this->s = $conn->prepare( $query );
+	}
+
+	function __destruct() {
+		$this->free();
+	}
+
+	function free() {
+		if( !$this->s ) return;
+		$this->s->close();
+		$this->s = null;
+	}
+
+	function exec( $args___ )
+	{
+		$args = func_get_args();
+		$types = $this->bind_types( $args );
+		/*
+		 * Make an array of references for the bind_param call.
+		 */
+		$a = array( $types );
+		$n = count( $args );
+		for( $i = 0; $i < $n; $i++ ) {
+			$a[] = &$args[$i];
+		}
+		call_user_func_array( array( $this->s, 'bind_param' ), $a );
+		return $this->s->execute();
+	}
+
+	private function bind_types( $args )
+	{
+		$types = "";
+		foreach( $args as $arg )
+		{
+			if( is_int( $arg ) ) {
+				$types .= "i";
+				continue;
+			}
+
+			if( is_double( $arg ) ) {
+				$types .= "d";
+				continue;
+			}
+
+			if( is_string( $arg ) ) {
+				$types .= "s";
+				continue;
+			}
+
+			// blob (b) is not used
+			trigger_error( "Unsupported argument type" );
+		}
+		return $types;
+	}
+
+	function scan( &$arg1,
+		&$arg2 = null, &$arg3 = null, &$arg4 = null,
+		&$arg5 = null, &$arg6 = null, &$arg7 = null, &$arg8 = null )
+	{
+		/*
+		 * As of PHP 5, there is no obvious way to accept a variable
+		 * number of arguments by references. func_get_args seems to
+		 * return copies. So we hardcode some maximum number of
+		 * arguments.
+		 */
+		$n = func_num_args();
+		if( $n > 8 ) {
+			trigger_error( "Too many arguments" );
+		}
+		$args = array();
+
+		for( $i = 1; $i <= $n; $i++ ) {
+			$name = 'arg'.$i;
+			$args[] = &$$name;
+		}
+
+		call_user_func_array( array( $this->s, 'bind_result' ), $args );
+		return $this->s->fetch();
 	}
 }
 
