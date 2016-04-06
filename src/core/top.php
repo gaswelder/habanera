@@ -29,10 +29,11 @@ class h2
 	private static $serve_functions = array();
 
 	/*
-	 * Serve content for the given URL.
+	 * Serve content for the current URL.
 	 */
-	static function process( $url )
+	static function process()
 	{
+		$url = CURRENT_URL;
 		$req = new req_url( $url );
 		self::$req = $req;
 
