@@ -235,13 +235,28 @@ class pages
 			return $href;
 		}
 
-		if( !file_exists( $href ) ) {
-			warning( "Referenced file '$href' does not exist." );
+		$url = parse_url( $href );
+		if( !isset( $url['query'] ) ) {
+			$url['query'] = '';
+		}
+
+		if( !isset( $url['path'] ) || count( $url ) != 2 ) {
+			warning( "Unknown href format: $href" );
 			return $href;
 		}
 
-		$time = filemtime( $href ) - strtotime( '2015-04-01' );
-		$href = SITE_ROOT . $href . '?v='.$time;
+		if( !file_exists( $url['path'] ) ) {
+			warning( "Referenced file '$url[path]' does not exist." );
+			return $href;
+		}
+
+		$time = filemtime( $url['path'] ) - strtotime( '2015-04-01' );
+		if( $url['query'] ) {
+			$url['query'] .= '&amp;';
+		}
+		$url['query'] .= 'v='.$time;
+
+		$href = SITE_ROOT . $url['path'] . '?'. $url['query'];
 		return $href;
 	}
 
