@@ -233,14 +233,13 @@ class __mysql
 	function getRecord( $mysql_query, $_args_ = null )
 	{
 		$args = func_get_args();
-		$mysql_query .= ' LIMIT 1';
-
 		$r = call_user_func_array( array( $this, 'exec' ), $args );
-		if( $r === null ){
-			return $r;
-		}
+
 		$row = $r->fetch_assoc();
-		mysqli_free_result( $r );
+		if( $row ) {
+			$row = $this->cast_types( $row, $this->typeinfo( $r ) );
+		}
+		$r->free();
 		return $row;
 	}
 
@@ -251,38 +250,100 @@ class __mysql
 		$r = call_user_func_array( array( $this, 'exec' ), $args );
 
 		$ae = array();
-		while( $e = $r->fetch_assoc() ){
-			$ae[] = $e;
+		$info = $this->typeinfo( $r );
+		while( $e = $r->fetch_assoc() ) {
+			$ae[] = $this->cast_types( $e, $info );
 		}
-		mysqli_free_result( $r );
+		$r->free();
 		return $ae;
 	}
+
+	private $ints = array(
+		MYSQLI_TYPE_TINY,
+		MYSQLI_TYPE_SHORT,
+		MYSQLI_TYPE_LONG,
+		MYSQLI_TYPE_LONGLONG,
+		MYSQLI_TYPE_INT24
+	);
+
+	private $floats = array(
+		MYSQLI_TYPE_FLOAT,
+		MYSQLI_TYPE_DOUBLE,
+		MYSQLI_TYPE_DECIMAL,
+		MYSQLI_TYPE_NEWDECIMAL
+	);
+
+	private function typeinfo( $result )
+	{
+		$info = array();
+		$F = $result->fetch_fields();
+		foreach( $F as $f )
+		{
+			$k = $f->name;
+			if( in_array( $f->type, $this->ints ) ) {
+				$info[$k] = 'int';
+				continue;
+			}
+			if( in_array( $f->type, $this->floats ) ) {
+				$info[$k] = 'flt';
+				continue;
+			}
+			$info[$k] = $f->type;
+		}
+		return $info;
+	}
+
+	private function cast_types( $a, $info )
+	{
+		foreach( $a as $k => $v )
+		{
+			if( $v === null ) continue;
+
+			switch( $info[$k] )
+			{
+				case "int":
+					$a[$k] = intval( $v );
+					break;
+				case "flt":
+					$a[$k] = floatval( $v );
+					break;
+			}
+		}
+		return $a;
+	}
+
 
 	function getValue( $mysql_query, $_args_ = null )
 	{
 		$args = func_get_args();
 		$r = call_user_func_array( array( $this, 'exec' ), $args );
 
-		if( $r === null ){
-			return $r;
-		}
-
 		$row = $r->fetch_row();
-		mysqli_free_result( $r );
-		return ( isset( $row[0] )? $row[0] : null );
+		if( $row )
+		{
+			$info = array_values( $this->typeinfo( $r ) );
+			$row = $this->cast_types( $row, $info );
+		}
+		$r->free();
+		if( $row ) {
+			return $row[0];
+		}
+		return null;
 	}
 
 	/* Fetches queried scalar values. */
 	function getValues( $mysql_query, $args = null )
 	{
 		$args = func_get_args();
-		$r = call_user_func_array( array( $this, 'exec' ), $args );
-		$a = array();
-		while( $e = $r->fetch_row() ){
-			$a[] = $e[0];
+		$result = call_user_func_array( array( $this, 'exec' ), $args );
+		$values = array();
+		$info = array_values( $this->typeinfo( $result ) );
+		while( $row = $result->fetch_row() ) {
+			$row = $this->cast_types( $row, $info );
+			$values[] = $row[0];
 		}
-		mysqli_free_result( $r );
-		return $a;
+		$result->free();
+		return $values;
 	}
 
 	/*
