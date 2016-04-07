@@ -115,7 +115,7 @@ class http_w
 	 */
 	static function show_error( $errno )
 	{
-		error_log( "HTTP error $errno" );
+		error_log( "HTTP error $errno	" . CURRENT_URL );
 		$s = self::get_error_page( $errno );
 		if( !$s ) {
 			$s = "Error $errno";
