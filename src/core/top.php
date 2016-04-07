@@ -19,6 +19,10 @@ function argv($i) {
 	return h2::argv($i);
 }
 
+function poparg() {
+	return h2::poparg();
+}
+
 class h2
 {
 	private static $req = null;
@@ -130,6 +134,15 @@ class h2
 		return self::$req->arg($i);
 	}
 
+	static function poparg()
+	{
+		$arg = self::$req->arg(0);
+		if( $arg === null ) {
+			return null;
+		}
+		self::$req->omit();
+		return $arg;
+	}
 }
 
 ?>
