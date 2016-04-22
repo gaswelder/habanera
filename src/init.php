@@ -61,6 +61,7 @@ function h2main()
 	require _PATH.'core/req_url.php';
 	require _PATH.'core/settings.php';
 	require _PATH.'core/top.php';
+	require _PATH.'core/uploads.php';
 	require _PATH.'core/user.php';
 	require _PATH.'core/vars.php';
 

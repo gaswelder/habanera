@@ -267,6 +267,26 @@
 		</article>
 	</article>
 
+	<article id="uploads">
+		<h1>File uploads</h1>
+
+		<article class="command" id="uploaded_files">
+			<h1>The <code>uploaded_files</code> function</h1>
+
+			<p class="disp"><code><var>$files</var> = uploaded_files(<var>$input_name</var>)</code></p>
+
+			<p>The <code>uploaded_files</code> function returns descriptions of uploaded files stored in the <code>$_FILES</code> global array under the index <var>$input_name</var>, converting the single-file case to the general multiple-files form. Each element of the <var>$files</var> array is an associative array with fields <code>name</code>, <code>type</code>, <code>tmp_name</code>, <code>size</code> and <code>error</code>.</p>
+		</article>
+
+		<article class="command" id="accept_uploads">
+			<h1>The <code>accept_uploads</code> function</h1>
+
+			<p class="disp"><code><var>$paths</var> = accept_uploads(<var>$input_name</var>, <var>$dirpath</var>)</code></p>
+
+			<p>The <code>accept_uploads</code> function processes the uploaded files using <var>$input_name</var> as index to the <code>$_FILES</code> global array, moves all uploaded files to the directory <var>$dirpath</var> assigning them random names and returns an array of paths to the new files.</p>
+		</article>
+	</article>
+
 	<article>
 		<h1>Writing files</h1>
 
