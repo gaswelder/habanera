@@ -63,9 +63,56 @@ class images
 		}
 
 		/*
+		 * The ETag must be sent regardless of whether 304 or 200 status
+		 * is returned.
+		 */
+		header( 'ETag: '.md5_file( $hashpath ) );
+
+		if( self::cache_valid( $hashpath ) ) {
+			http_status( 304 );
+			return true;
+		}
+
+		/*
 		 * Return the file.
 		 */
-		return self::serve_file( $hashpath );
+		$mime = self::get_mime( $hashpath );
+		$size = filesize( $hashpath );
+		$src = file_get_contents( $hashpath );
+
+		header( 'Content-Type: '.$mime );
+		header( 'Content-Length: '.$size );
+		header( 'Last-Modified: ' . date( 'r', filemtime( $hashpath ) ) );
+		echo $src;
+		return true;
+	}
+
+	private static function cache_valid( $path )
+	{
+		$sum = req_header( 'If-None-Match' );
+		$date = req_header( 'If-Modified-Since' );
+
+		/*
+		 * If no validators are given, don't serve from cache.
+		 */
+		if( !$sum && !$date ) {
+			return false;
+		}
+
+		if( $sum ) {
+			$sums = array_map( 'trim', explode( ',', $sum ) );
+			if( !in_array( md5_file( $path ), $sums ) ) {
+				return false;
+			}
+		}
+
+		if( $date ) {
+			$t = strtotime( $date );
+			if( filemtime( $path ) > $t ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/*
@@ -202,20 +249,6 @@ class images
 			return false;
 		}
 
-		return true;
-	}
-
-	private static function serve_file( $path )
-	{
-		$mime = self::get_mime( $path );
-		$size = filesize( $path );
-
-		header( 'Content-Type: '.$mime );
-		header( 'Content-Length: '.$size );
-		header( 'Last-Modified: ' . date( 'r', filemtime( $path ) ) );
-		$f = fopen( $path, 'rb' );
-		fpassthru( $f );
-		fclose( $f );
 		return true;
 	}
 
