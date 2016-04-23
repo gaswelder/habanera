@@ -66,6 +66,18 @@ function announce_file( $filename, $size = null )
 	}
 }
 
+function http_status( $code ) {
+	http_w::show_status( $code );
+}
+
+function req_header( $name ) {
+	$h = getallheaders();
+	if( isset( $h[$name] ) ) {
+		return $h[$name];
+	}
+	return null;
+}
+
 class http_w
 {
 	/*

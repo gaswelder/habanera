@@ -98,7 +98,15 @@
 <article>
 	<h1>Library</h1>
 	<article>
-		<h1>Output</h1>
+		<h1>HTTP header functions</h1>
+
+		<article class="command">
+			<h1>The <code>req_header</code> function</h1>
+
+			<p class="disp"><code><var>$value</var> = req_header(<var>$name</var>)</code></p>
+
+			<p>The <code>req_header</code> function returns the value of the request header <var>$name</var>, if one is given, or <code>null</code> if not.</p>
+		</article>
 
 		<article class="command">
 			<h1>The <code>redirect</code> function</h1>
@@ -106,6 +114,14 @@
 			<p><code>redirect($url)</code></p>
 
 			<p>The <code>redirect</code> function writes appropriate HTTP headers to the output to redirect the browser to the given URL. The script execution is stopped after that.</p>
+		</article>
+
+		<article class="command">
+			<h1>The <code>http_status</code> function</h1>
+
+			<p class="disp"><code>http_status(<var>$code</var>)</code></p>
+
+			<p>The <code>http_status</code> function adds to the output an HTTP status header corresponding to the given HTTP status code.</p>
 		</article>
 
 		<article class="command">
