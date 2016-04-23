@@ -52,6 +52,7 @@ function h2main()
 
 	mb_internal_encoding( 'UTF-8' );
 
+	require _PATH.'core/http.php';
 	require _PATH.'core/output.php';
 	require _PATH.'core/errors.php';
 	require _PATH.'core/libs.php';
