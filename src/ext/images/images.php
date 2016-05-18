@@ -207,9 +207,16 @@ class images
 	 */
 	private static function hashpath( $path, $width, $height )
 	{
+		$dirpath = setting( 'imgcache' );
+		if( !$dirpath ) {
+			$dirpath = WRITE_DIR . 'image-previews/';
+		}
+		if( substr( $dirpath, -1 ) != '/' ) {
+			$dirpath .= '/';
+		}
+
 		$ext = self::get_ext( $path );
-		return WRITE_DIR . 'image-previews/'
-			. md5_file( $path ).'_'.$width.'x'.$height . $ext;
+		return $dirpath . md5_file( $path ).'_'.$width.'x'.$height . $ext;
 	}
 
 	/*

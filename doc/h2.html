@@ -404,6 +404,18 @@
 
 		<p>The <code>ext_debug</code> extension catches all errors and outputs execution stacks terminating the script. It does nothing if the <code>debug</code> parameter is not set to <code>1</code>.</p>
 	</article>
+
+	<article id="images">
+		<h1>The <code>images</code> subserver</h1>
+
+		<article class="command" id="imgcache">
+			<h1>The <code>imgcache</code> parameter</h1>
+
+			<p>The <code>imgcache</code> parameter defines the path to the directory where preview copies of images will be stored. If the parameter is not defined, then <code><var>WRITE_DIR</var>/image-previews</code> is assumed.</p>
+
+			<p>Regardless of the path the script must have write permissions for that directory. If it doesn't exist, the script must be able to create it.</p>
+		</article>
+	</article>
 </section>
 
 <script src="toc.js?auto-id"></script>
