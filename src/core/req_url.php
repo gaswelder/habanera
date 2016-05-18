@@ -22,13 +22,11 @@ class req_url
 	 */
 	private $omitted = 0;
 
-
 	function __construct( $url )
 	{
 		$path = parse_url( $url, PHP_URL_PATH );
 		$this->args = array_slice( explode( '/', $path ), 1 );
 	}
-
 
 	/*
 	 * "Omit" 'n' more parts of the URL.

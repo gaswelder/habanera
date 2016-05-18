@@ -1,9 +1,24 @@
 <?php
 
+define( '_PATH', dirname(__FILE__).'/' );
+require _PATH.'core/http.php';
+require _PATH.'core/output.php';
+require _PATH.'core/errors.php';
+require _PATH.'core/libs.php';
+require _PATH.'core/files.php';
+require _PATH.'core/functions.php';
+require _PATH.'core/logs.php';
+require _PATH.'core/req_url.php';
+require _PATH.'core/settings.php';
+require _PATH.'core/top.php';
+require _PATH.'core/uploads.php';
+require _PATH.'core/user.php';
+require _PATH.'core/vars.php';
+require _PATH.'subservers/pages.php';
+require _PATH.'subservers/actions.php';
+
 function h2main( $base = '/' )
 {
-	define( '_PATH', dirname(__FILE__).'/' );
-
 	/*
 	 * APP_DIR is the read-only directory where application files are
 	 * stored: templates, configuration files, static data and other source
@@ -32,22 +47,6 @@ function h2main( $base = '/' )
 		define( 'SITE_PROTOCOL', 'http' );
 	}
 
-	mb_internal_encoding( 'UTF-8' );
-
-	require _PATH.'core/http.php';
-	require _PATH.'core/output.php';
-	require _PATH.'core/errors.php';
-	require _PATH.'core/libs.php';
-	require _PATH.'core/files.php';
-	require _PATH.'core/functions.php';
-	require _PATH.'core/logs.php';
-	require _PATH.'core/req_url.php';
-	require _PATH.'core/settings.php';
-	require _PATH.'core/top.php';
-	require _PATH.'core/uploads.php';
-	require _PATH.'core/user.php';
-	require _PATH.'core/vars.php';
-
 	/*
 	 * We need to know the hostname to create URLs. It is in the HTTP_HOST
 	 * header. If it is not there, then we are most likely dealing with some
@@ -62,8 +61,7 @@ function h2main( $base = '/' )
 	define( 'SITE_DOMAIN', SITE_PROTOCOL.'://'.$_SERVER['HTTP_HOST'] );
 	define( 'CURRENT_URL', SITE_DOMAIN.$_SERVER['REQUEST_URI'] );
 
-	require _PATH.'subservers/pages.php';
-	require _PATH.'subservers/actions.php';
+	mb_internal_encoding( 'UTF-8' );
 
 	add_classes_dir( APP_DIR.'classes' );
 	if( file_exists( APP_DIR.'init.php' ) ) {

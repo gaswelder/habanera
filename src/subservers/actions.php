@@ -244,14 +244,11 @@ class actions
 	 */
 	private static function action_redirect( $name, $errors )
 	{
-		/*
-		 * The aurl function ensures that both values will be present.
-		 */
 		$redirect_success = isset( $_GET['rs'] ) ? $_GET['rs'] : null;
 		$redirect_failure = isset( $_GET['rf'] ) ? $_GET['rf'] : null;
 
 		/*
-		 * If the action was called explicitly without redirect, we
+		 * If the action was called without redirect URL, we
 		 * only can stop. Either both URLs are present, or none.
 		 */
 		if( !$redirect_success ) {
