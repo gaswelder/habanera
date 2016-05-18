@@ -69,7 +69,7 @@ function aurl_t( $name, $redirect_ok = null, $redirect_fail = null )
 		$redirect_fail = $redirect_ok;
 	}
 
-	return SITE_DOMAIN . SITE_ROOT . 'a/'.$name.'?rs='.urlencode($redirect_ok)
+	return h2::prefix() . 'a/'.$name.'?rs='.urlencode($redirect_ok)
 		.'&rf='.urlencode($redirect_fail);
 }
 

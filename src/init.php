@@ -1,6 +1,6 @@
 <?php
 
-function h2main()
+function h2main( $base = '/' )
 {
 	define( '_PATH', dirname(__FILE__).'/' );
 
@@ -21,15 +21,6 @@ function h2main()
 	 */
 	if( !defined( 'WRITE_DIR' ) ) {
 		define( 'WRITE_DIR', APP_DIR.'tmp/' );
-	}
-
-	/*
-	 * SITE_ROOT is a prefix added to all site URLs. Most times
-	 * this is a single backslash, but if the site is placed in a
-	 * subdirectory, SITE_ROOT has to specify that subdirectory.
-	 */
-	if( !defined( 'SITE_ROOT' ) ) {
-		define( 'SITE_ROOT', '/' );
 	}
 
 	/*
@@ -89,6 +80,6 @@ function h2main()
 	}
 
 	load_ext( 'snippets' );
-	h2::process();
+	h2::process( $base );
 }
 ?>

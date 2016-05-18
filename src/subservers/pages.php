@@ -222,7 +222,8 @@ class pages
 		}
 
 		foreach( self::$links as $link ) {
-			$lines[] = '<link rel="'.$link['rel'].'" href="'.$link['href'].'">';
+			$href = self::$req->prefix() .  $link['href'];
+			$lines[] = '<link rel="'.$link['rel'].'" href="'.$href.'">';
 		}
 
 		$s = implode( PHP_EOL . "\t", $lines ) . PHP_EOL;
@@ -256,7 +257,7 @@ class pages
 		}
 		$url['query'] .= 'v='.$time;
 
-		$href = SITE_ROOT . $url['path'] . '?'. $url['query'];
+		$href = $url['path'] . '?'. $url['query'];
 		return $href;
 	}
 
@@ -265,7 +266,8 @@ class pages
 		// Insert scripts at the bottom.
 		$lines = array();
 		foreach( self::$scripts as $path ){
-			$lines[] = '<script src="'.$path.'"></script>';
+			$href = self::$req->prefix() .  $path;
+			$lines[] = '<script src="'.$href.'"></script>';
 		}
 		$src = str_replace( '</body>',
 			implode( PHP_EOL, $lines ).PHP_EOL.'</body>', $src );

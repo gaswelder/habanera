@@ -198,7 +198,7 @@ class images
 			$path = substr( $path, 0, -strlen( $ext ) ) . $marker . $ext;
 		}
 
-		return SITE_DOMAIN . SITE_ROOT . $path;
+		return h2::prefix() . $path;
 	}
 
 	/*

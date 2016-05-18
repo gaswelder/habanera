@@ -32,11 +32,22 @@ class h2
 	 */
 	private static $serve_functions = array();
 
+	static function prefix() {
+		return self::$req->prefix();
+	}
+
 	/*
 	 * Serve content for the current URL.
 	 */
-	static function process()
+	static function process( $base )
 	{
+		/*
+		 * Remove trailing slash from the base path.
+		 */
+		if( substr( $base, -1 ) == "/" ) {
+			$base = substr( $base, 0, -1 );
+		}
+
 		$url = CURRENT_URL;
 		$req = new req_url( $url );
 		self::$req = $req;
@@ -44,6 +55,11 @@ class h2
 		if( !self::check_url( $req ) ) {
 			error_log( "Bad URL: $url" );
 			error_bad_request();
+		}
+
+		if( $base != "" && self::poparg() != $base ) {
+			trigger_error( "Expected URL starting with $base, got $url" );
+			return false;
 		}
 
 		self::preprocess_url( $req );
