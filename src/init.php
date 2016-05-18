@@ -24,15 +24,6 @@ function h2main( $base = '/' )
 	}
 
 	/*
-	 * USER_AGENT
-	 */
-	if( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
-		define( 'USER_AGENT', $_SERVER['HTTP_USER_AGENT'] );
-	} else {
-		define( 'USER_AGENT', 'Unknown agent' );
-	}
-
-	/*
 	 * SITE_PROTOCOL
 	 */
 	if( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) {

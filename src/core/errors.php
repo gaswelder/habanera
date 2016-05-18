@@ -55,7 +55,7 @@ class _error_handlers
 		$str = implode( "\t", array(
 			"$msg at $file:$line",
 			$_SERVER['REQUEST_URI'],
-			USER_AGENT,
+			alt( req_header( "User-Agent" ), "(unknown agent)" ),
 			$_SERVER['REMOTE_ADDR']
 		));
 		error_log( $str );
