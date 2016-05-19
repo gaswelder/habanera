@@ -289,7 +289,7 @@ class pages
 		 * We have to get the omitted part too to build the correct
 		 * URL.
 		 */
-		return SITE_DOMAIN . self::$req->prefix() . $path;
+		return self::$req->prefix() . $path;
 	}
 
 }

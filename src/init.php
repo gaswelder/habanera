@@ -39,15 +39,6 @@ function h2main( $base = '/' )
 	}
 
 	/*
-	 * SITE_PROTOCOL
-	 */
-	if( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) {
-		define( 'SITE_PROTOCOL', 'https' );
-	} else {
-		define( 'SITE_PROTOCOL', 'http' );
-	}
-
-	/*
 	 * We need to know the hostname to create URLs. It is in the HTTP_HOST
 	 * header. If it is not there, then we are most likely dealing with some
 	 * shady script making queries because all web browsers and most bots
@@ -58,8 +49,14 @@ function h2main( $base = '/' )
 		error_not_found();
 	}
 
-	define( 'SITE_DOMAIN', SITE_PROTOCOL.'://'.$_SERVER['HTTP_HOST'] );
-	define( 'CURRENT_URL', SITE_DOMAIN.$_SERVER['REQUEST_URI'] );
+	if( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) {
+		$protocol = "https";
+	}
+	else {
+		$protocol = "http";
+	}
+	$domain = $protocol.'://'.$_SERVER['HTTP_HOST'];
+	define( 'CURRENT_URL', $domain . $_SERVER['REQUEST_URI'] );
 
 	mb_internal_encoding( 'UTF-8' );
 
