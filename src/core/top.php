@@ -39,7 +39,7 @@ class h2
 	/*
 	 * Serve content for the current URL.
 	 */
-	static function process( $base )
+	static function main( $base )
 	{
 		/*
 		 * Remove trailing slash from the base path.
@@ -47,6 +47,35 @@ class h2
 		if( substr( $base, -1 ) == "/" ) {
 			$base = substr( $base, 0, -1 );
 		}
+
+		/*
+		 * We need to know the hostname to create URLs. It is in the HTTP_HOST
+		 * header. If it is not there, then we are most likely dealing with some
+		 * shady script making queries because all web browsers and most bots
+		 * support this header.
+		 */
+		if( !isset( $_SERVER['HTTP_HOST'] ) ) {
+			warning( "No host given in the request" );
+			error_not_found();
+		}
+
+		if( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) {
+			$protocol = "https";
+		}
+		else {
+			$protocol = "http";
+		}
+		$domain = $protocol.'://'.$_SERVER['HTTP_HOST'];
+		define( 'CURRENT_URL', $domain . $_SERVER['REQUEST_URI'] );
+
+		mb_internal_encoding( 'UTF-8' );
+
+		add_classes_dir( APP_DIR.'classes' );
+		if( file_exists( APP_DIR.'init.php' ) ) {
+			require APP_DIR.'init.php';
+		}
+
+		load_ext( 'snippets' );
 
 		$url = CURRENT_URL;
 		$req = new req_url( $url );
