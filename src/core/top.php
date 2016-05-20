@@ -59,6 +59,9 @@ class h2
 			error_not_found();
 		}
 
+		/*
+		 * Reconstruct the requested URL.
+		 */
 		if( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) {
 			$protocol = "https";
 		}
@@ -66,18 +69,12 @@ class h2
 			$protocol = "http";
 		}
 		$domain = $protocol.'://'.$_SERVER['HTTP_HOST'];
+		self::$url = $domain . $_SERVER['REQUEST_URI'];
 
-		mb_internal_encoding( 'UTF-8' );
-
-		add_classes_dir( APP_DIR.'classes' );
-		if( file_exists( APP_DIR.'init.php' ) ) {
-			require APP_DIR.'init.php';
-		}
-
-		load_ext( 'snippets' );
-
-		$url = CURRENT_URL;
-		$req = new req_url( $url );
+		/*
+		 * Parse and check the URL.
+		 */
+		$req = new req_url( self::$url );
 		self::$req = $req;
 
 		if( !self::check_url( $req ) ) {
@@ -90,7 +87,23 @@ class h2
 			return false;
 		}
 
-		self::preprocess_url( $req );
+		mb_internal_encoding( 'UTF-8' );
+
+		add_classes_dir( APP_DIR.'classes' );
+		if( file_exists( APP_DIR.'init.php' ) ) {
+			require APP_DIR.'init.php';
+		}
+
+		load_ext( 'snippets' );
+
+		/*
+		 * Run the URL preprocessing function, if specified.
+		 * There is intentionally only one function because the
+		 * preprocessing is a global decision.
+		 */
+		if( self::$preprocess_func ) {
+			call_user_func( self::$preprocess_func, $req );
+		}
 
 		if( !self::serve_content( $req ) ) {
 			error_notfound();
@@ -119,36 +132,6 @@ class h2
 	}
 
 	/*
-	 * Preprocessing is made before the URL is given to any of the
-	 * subservers. This step may have redirects, error triggers or
-	 * URL manipulation.
-	 */
-	static function preprocess_url( req_url $url )
-	{
-		/*
-		 * There is intentionally only one function because the
-		 * preprocessing is a global decision.
-		 */
-		if( !self::$preprocess_func ) {
-			return;
-		}
-		call_user_func( self::$preprocess_func, $url );
-	}
-
-	static function set_url_proc( $func )
-	{
-		if( self::$preprocess_func != null ) {
-			error( "URL preprocess function is already registered." );
-			return;
-		}
-		if( !is_callable( $func ) ) {
-			error( "URL preprocess function is not callable" );
-			return;
-		}
-		self::$preprocess_func = $func;
-	}
-
-	/*
 	 * Serve the content for the given URL.
 	 */
 	private static function serve_content( $req )
@@ -162,30 +145,6 @@ class h2
 			}
 		}
 		return false;
-	}
-
-	static function add_subserver( $func )
-	{
-		if( !is_callable( $func ) ) {
-			error( "Given subserver function is not callable" );
-			return false;
-		}
-		array_unshift( self::$serve_functions, $func );
-		return true;
-	}
-
-	static function argv($i) {
-		return self::$req->arg($i);
-	}
-
-	static function poparg()
-	{
-		$arg = self::$req->arg(0);
-		if( $arg === null ) {
-			return null;
-		}
-		self::$req->omit();
-		return $arg;
 	}
 }
 
