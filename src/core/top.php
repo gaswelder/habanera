@@ -23,24 +23,79 @@ function poparg() {
 	return h2::poparg();
 }
 
+function current_url() {
+	return h2::url();
+}
+
 class h2
 {
+	private static $url = null;
 	private static $req = null;
+
 	private static $preprocess_func = null;
-	/*
-	 * Entry functions for registered "subservers".
-	 */
 	private static $serve_functions = array();
+
+	static function set_url_proc( $func )
+	{
+		if( self::$preprocess_func != null ) {
+			error( "URL preprocess function is already registered." );
+			return;
+		}
+		if( !is_callable( $func ) ) {
+			error( "URL preprocess function is not callable" );
+			return;
+		}
+		self::$preprocess_func = $func;
+	}
+
+	static function add_subserver( $func )
+	{
+		if( !is_callable( $func ) ) {
+			error( "Given subserver function is not callable" );
+			return false;
+		}
+		array_unshift( self::$serve_functions, $func );
+		return true;
+	}
+
+	static function url() {
+		return self::$url;
+	}
 
 	static function prefix() {
 		return self::$req->prefix();
 	}
 
-	/*
-	 * Serve content for the current URL.
-	 */
-	static function main( $base )
+	static function argv($i) {
+		return self::$req->arg($i);
+	}
+
+	static function poparg()
 	{
+		$arg = self::$req->arg(0);
+		if( $arg === null ) {
+			return null;
+		}
+		self::$req->omit();
+		return $arg;
+	}
+
+	/*
+	 * Main function of the whole script.
+	 */
+	static function main( $appdir, $base )
+	{
+		define( 'APP_DIR', 'appfiles/' );
+
+		/*
+		 * WRITE_DIR is a directory in which the script will be writing some
+		 * working files like cache files or logs. It must not be accessible
+		 * through HTTP.
+		 */
+		if( !defined( 'WRITE_DIR' ) ) {
+			define( 'WRITE_DIR', APP_DIR.'tmp/' );
+		}
+
 		/*
 		 * Remove trailing slash from the base path.
 		 */
