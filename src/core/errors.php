@@ -23,7 +23,7 @@ function warning( $message ) {
 }
 
 function error( $message ) {
-	trigger_error( $message );
+	trigger_error( $message, E_USER_ERROR );
 }
 
 class _error_handlers
