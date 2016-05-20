@@ -52,10 +52,14 @@ class _error_handlers
 
 	private static function log_error( $msg, $file, $line )
 	{
+		$agent = req_header( "User-Agent" );
+		if( $agent === null ) {
+			$agent = "(unknown agent)";
+		}
 		$str = implode( "\t", array(
 			"$msg at $file:$line",
 			$_SERVER['REQUEST_URI'],
-			alt( req_header( "User-Agent" ), "(unknown agent)" ),
+			$agent,
 			$_SERVER['REMOTE_ADDR']
 		));
 		error_log( $str );
