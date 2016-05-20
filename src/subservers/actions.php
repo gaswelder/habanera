@@ -63,7 +63,7 @@ function action_errors()
 function aurl_t( $name, $redirect_ok = null, $redirect_fail = null )
 {
 	if( !$redirect_ok ) {
-		$redirect_ok = CURRENT_URL;
+		$redirect_ok = current_url();
 	}
 	if( !$redirect_fail ) {
 		$redirect_fail = $redirect_ok;
@@ -293,7 +293,7 @@ class actions
 			return;
 		}
 
-		$url = CURRENT_URL;
+		$url = current_url();
 		if( empty( $errors ) ) {
 			$status = 'OK';
 		}

@@ -66,7 +66,6 @@ class h2
 			$protocol = "http";
 		}
 		$domain = $protocol.'://'.$_SERVER['HTTP_HOST'];
-		define( 'CURRENT_URL', $domain . $_SERVER['REQUEST_URI'] );
 
 		mb_internal_encoding( 'UTF-8' );
 
