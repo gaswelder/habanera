@@ -131,6 +131,7 @@ class __mysql
 
 		if( $this->connection->warning_count )
 		{
+			$Q = $this->display_query( $query );
 			$warnings = $this->getRecords( "SHOW WARNINGS" );
 			foreach( $warnings as $warning )
 			{
