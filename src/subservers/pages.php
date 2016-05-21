@@ -199,7 +199,7 @@ class pages
 	{
 		if( !self::$title ) return;
 
-		$c = '<title>'.self::$title.'</title>';
+		$c = '<title>'.htmlspecialchars( self::$title ).'</title>';
 		if( strpos( $src, '<title>' ) === false ) {
 			$src = str_replace( '</head>', $c."\n</head>", $src );
 		}
@@ -218,11 +218,11 @@ class pages
 
 		foreach( self::$meta as $name => $content ) {
 			$lines[] = sprintf( '<meta name="%s" content="%s">',
-				$name, $content );
+				htmlspecialchars( $name ), htmlspecialchars( $content ) );
 		}
 
 		foreach( self::$links as $link ) {
-			$href = h2::base() . '/' .$link['href'];
+			$href = htmlspecialchars( h2::base() . '/' .$link['href'] );
 			$lines[] = '<link rel="'.$link['rel'].'" href="'.$href.'">';
 		}
 
@@ -253,7 +253,7 @@ class pages
 
 		$time = filemtime( $url['path'] ) - strtotime( '2015-04-01' );
 		if( $url['query'] ) {
-			$url['query'] .= '&amp;';
+			$url['query'] .= '&';
 		}
 		$url['query'] .= 'v='.$time;
 
@@ -266,7 +266,7 @@ class pages
 		// Insert scripts at the bottom.
 		$lines = array();
 		foreach( self::$scripts as $path ){
-			$href = h2::base() . '/' . $path;
+			$href = htmlspecialchars( h2::base() . '/' . $path );
 			$lines[] = '<script src="'.$href.'"></script>';
 		}
 		$src = str_replace( '</body>',
