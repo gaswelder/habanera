@@ -31,6 +31,7 @@ class h2
 {
 	private static $url = null;
 	private static $req = null;
+	private static $base = null;
 
 	private static $preprocess_func = null;
 	private static $serve_functions = array();
@@ -60,6 +61,10 @@ class h2
 
 	static function url() {
 		return self::$url;
+	}
+
+	static function base() {
+		return '/' . self::$base;
 	}
 
 	static function prefix() {
@@ -102,6 +107,8 @@ class h2
 		if( substr( $base, -1 ) == "/" ) {
 			$base = substr( $base, 0, -1 );
 		}
+
+		self::$base = $base;
 
 		/*
 		 * We need to know the hostname to create URLs. It is in the HTTP_HOST

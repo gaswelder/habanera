@@ -222,7 +222,7 @@ class pages
 		}
 
 		foreach( self::$links as $link ) {
-			$href = self::$req->prefix() .  $link['href'];
+			$href = h2::base() . '/' .$link['href'];
 			$lines[] = '<link rel="'.$link['rel'].'" href="'.$href.'">';
 		}
 
@@ -266,7 +266,7 @@ class pages
 		// Insert scripts at the bottom.
 		$lines = array();
 		foreach( self::$scripts as $path ){
-			$href = self::$req->prefix() .  $path;
+			$href = h2::base() . '/' . $path;
 			$lines[] = '<script src="'.$href.'"></script>';
 		}
 		$src = str_replace( '</body>',
