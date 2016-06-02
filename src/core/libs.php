@@ -28,8 +28,11 @@ function load_ext( $names__ )
 /*
  * Load a library from the "lib" directory inside APP_DIR.
  */
-function lib( $name ) {
-	require APP_DIR."lib/$name.php";
+function lib( $names__ ) {
+	$args = func_get_args();
+	foreach( $args as $name ) {
+		require APP_DIR."lib/$name.php";
+	}
 }
 
 /*
