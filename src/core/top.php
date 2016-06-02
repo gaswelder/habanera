@@ -30,6 +30,7 @@ function current_url() {
 class h2
 {
 	private static $url = null;
+	private static $domain = null;
 	private static $req = null;
 	private static $base = null;
 
@@ -64,11 +65,11 @@ class h2
 	}
 
 	static function base() {
-		return '/' . self::$base;
+		return self::$domain . '/' . self::$base;
 	}
 
 	static function prefix() {
-		return self::$req->prefix();
+		return self::$domain . self::$req->prefix();
 	}
 
 	static function argv($i) {
@@ -131,6 +132,7 @@ class h2
 			$protocol = "http";
 		}
 		$domain = $protocol.'://'.$_SERVER['HTTP_HOST'];
+		self::$domain = $domain;
 		self::$url = $domain . $_SERVER['REQUEST_URI'];
 
 		/*

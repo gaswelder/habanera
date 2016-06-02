@@ -77,7 +77,6 @@ class pages
 			return false;
 		}
 
-		self::$req = $req;
 		$i = self::traverse( $req );
 		if( $i < 0 ) {
 			return false;
@@ -289,7 +288,7 @@ class pages
 		 * We have to get the omitted part too to build the correct
 		 * URL.
 		 */
-		return self::$req->prefix() . $path;
+		return h2::prefix() . $path;
 	}
 
 }
