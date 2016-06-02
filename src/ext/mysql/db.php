@@ -101,6 +101,18 @@ class DB
 		$args = func_get_args();
 		return self::proxy( 'buildCondition', $args );
 	}
+
+	static function begin() {
+		return self::exec( "START TRANSACTION" );
+	}
+
+	static function end() {
+		return self::exec( "COMMIT" );
+	}
+
+	static function cancel() {
+		return self::exec( "ROLLBACK" );
+	}
 }
 
 ?>
