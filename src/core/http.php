@@ -44,17 +44,9 @@ function announce_html( $charset = 'UTF-8' ) {
 
 function announce_file( $filename, $size = null )
 {
-	$types = array(
-		'.xls' => 'application/vnd.ms-excel',
-		'.xlsx' => 'application/vnd.openxmlformats-officedocument'.
-			'.spreadsheetml.sheet',
-		'.zip' => 'application/zip'
-	);
 	$ext = ext( $filename );
-	if( isset( $types[$ext] ) ) {
-		$type = $types[$ext];
-	}
-	else {
+	$type = _mime::type( $ext );
+	if( !$type ) {
 		warning( "Unknown MIME type for '$filename'" );
 		$type = 'application/octet-stream';
 	}

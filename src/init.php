@@ -1,6 +1,7 @@
 <?php
 
 define( '_PATH', dirname(__FILE__).'/' );
+require _PATH.'core/mime.php';
 require _PATH.'core/http.php';
 require _PATH.'core/output.php';
 require _PATH.'core/errors.php';

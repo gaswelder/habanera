@@ -104,7 +104,27 @@ class uploads
 	 */
 	private static function newpath( $file, $dest_dir )
 	{
-		$ext = self::ext( $file['name'] );
+		/*
+		 * Determine the extension based on the MIME type and file name
+		 * given by the user agent.
+		 */
+		$ext = _mime::ext( $file['type'] );
+		if( $ext === null ) {
+			warning( "Unknown uploaded file type: $file[type]" );
+			$ext = self::ext( $file['name'] );
+		}
+		if( $ext == '' && strpos( $file['name'], '.' ) !== false ) {
+			warning( "File '$file[name]' uploaded as octet-stream" );
+			$ext = self::ext( $file['name'] );
+		}
+		if( $ext == '.php' ) {
+			warning( ".php file uploaded" );
+			$ext .= '.txt';
+		}
+
+		/*
+		 * Generate a path for the new file.
+		 */
 		$path = $dest_dir . uniqid() . $ext;
 		$i = 0;
 		while( file_exists( $path ) ) {
