@@ -27,13 +27,19 @@ class uploads
 			return array();
 		}
 
-		$accepted = array();
+		/*
+		 * Make sure dest_dir ends with a slash.
+		 */
+		if( substr( $dest_dir, -1 ) != '/' ) {
+			$dest_dir .= '/';
+		}
 
+		$accepted = array();
 		$files = self::get_files( $input_name );
 		foreach( $files as $file )
 		{
 			if( $file['error'] || !$file['size'] ) {
-				warning( "Upload failed: $file[name]" );
+				warning( "File upload failed: $file[name]" );
 				continue;
 			}
 
@@ -53,38 +59,18 @@ class uploads
 		return $accepted;
 	}
 
-	private static function newpath( $file, $dest_dir )
-	{
-		$ext = self::ext( $file['name'] );
-		$pref = $dest_dir;
-		if( substr( $dest_dir, -1 ) != '/' ) {
-			$pref .= '/';
-		}
-
-		$path = $pref . uniqid() . $ext;
-		$i = 0;
-		while( file_exists( $path ) ) {
-			$i++;
-			warning( "Filename collision in uploads::newpath: $path" );
-			if( $i >= 3 ) {
-				return null;
-			}
-			$path = $pref . uniqid() . $ext;
-		}
-
-		return $path;
-	}
-
 	/*
 	 * Returns array of "dicts" {type, tmp_name, error, size, name}
-	 * uniformly for single-file and multi-file inputs.
+	 * describing files uploaded through the input with the given
 	 * Returns null if there is no such input.
 	 */
 	private static function get_files( $input_name )
 	{
 		$inputs = array();
 
-		/* If the input is a single file, return it. */
+		/*
+		 * Single-file case.
+		 */
 		if( !is_array( $_FILES[$input_name]["name"] ) )
 		{
 			if( $_FILES[$input_name]['name'] != '' ){
@@ -93,6 +79,9 @@ class uploads
 			return $inputs;
 		}
 
+		/*
+		 * Multiple-file case.
+		 */
 		$fields = array( "type", "tmp_name", "error", "size", "name" );
 		foreach( $_FILES[$input_name]["name"] as $i => $name )
 		{
@@ -107,6 +96,26 @@ class uploads
 		}
 
 		return $inputs;
+	}
+
+	/*
+	 * Generates a name for the given file to be stored in the
+	 * 'dest_dir' directory.
+	 */
+	private static function newpath( $file, $dest_dir )
+	{
+		$ext = self::ext( $file['name'] );
+		$path = $dest_dir . uniqid() . $ext;
+		$i = 0;
+		while( file_exists( $path ) ) {
+			$i++;
+			warning( "Filename collision in uploads::newpath: $path" );
+			if( $i >= 3 ) {
+				return null;
+			}
+			$path = $pref . uniqid() . $ext;
+		}
+		return $path;
 	}
 
 	private static function ext( $filename )
