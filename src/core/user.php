@@ -27,28 +27,28 @@ class user
 	/*
 	 * Returns user type set with the "authorise" function.
 	 */
-	static function get_type() {
+	static function type() {
 		return self::sget( 'type' );
 	}
 
 	/*
 	 * Returns user identifier set with the "authorise" function.
 	 */
-	static function get_id() {
+	static function id() {
 		return self::sget( 'id' );
 	}
 
 	/*
 	 * Store arbitrary key-value pair.
 	 */
-	static function set_data( $key, $value ) {
+	static function set( $key, $value ) {
 		self::sset( 'data-'.$key, $value );
 	}
 
 	/*
 	 * Retrieve arbitrary key-value pair.
 	 */
-	static function get_data( $key ) {
+	static function get( $key ) {
 		return self::sget( 'data-'.$key );
 	}
 
