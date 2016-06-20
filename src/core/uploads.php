@@ -47,7 +47,8 @@ class uploads
 		foreach( $files as $file )
 		{
 			if( $file['error'] || !$file['size'] ) {
-				warning( "File upload failed: $file[name]" );
+				$errstr = self::errstr( $file['error'] );
+				warning( "Upload of file '$file[name]' failed ($errstr, size=$file[size])" );
 				continue;
 			}
 
@@ -150,7 +151,30 @@ class uploads
 	{
 		$ext = pathinfo( $filename, PATHINFO_EXTENSION );
 		if( $ext != '' ) $ext = '.'.$ext;
-		return $ext;
+		return strtolower( $ext );
+	}
+
+	private static function errstr( $errno )
+	{
+		switch( $errno )
+		{
+			case UPLOAD_ERR_OK:
+				return "no error";
+			case UPLOAD_ERR_INI_SIZE:
+				return "the file exceeds the 'upload_max_filesize' limit";
+			case UPLOAD_ERR_FORM_SIZE:
+				return "the file exceeds the 'MAX_FILE_SIZE' directive that was specified in the HTML form";
+			case UPLOAD_ERR_PARTIAL:
+				return "the file was only partially uploaded";
+			case UPLOAD_ERR_NO_FILE:
+				return "no file was uploaded";
+			case UPLOAD_ERR_NO_TMP_DIR:
+				return "missing temporary folder";
+			case UPLOAD_ERR_CANT_WRITE:
+				return "failed to write file to disk";
+			default:
+				return "unknown error ($errno)";
+		}
 	}
 }
 ?>
