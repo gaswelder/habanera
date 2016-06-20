@@ -121,7 +121,7 @@ class actions
 		if( !self::action_exists( $action_name ) ) {
 			error_notfound();
 		}
-		if( !self::action_allowed( $action_name, user::get_type() ) ) {
+		if( !self::action_allowed( $action_name ) ) {
 			error_forbidden();
 		}
 
@@ -169,15 +169,28 @@ class actions
 	 * Returns true if the given user type has access to the given
 	 * action.
 	 */
-	private static function action_allowed( $action_name, $user_type )
+	private static function action_allowed( $action_name )
 	{
 		$list = self::$users[$action_name];
-		foreach( $list as $type )
-		{
-			if( $type == 'all' || $type == $user_type ){
+
+		/*
+		 * If 'all' is mentioned in the list, can run it for everyone.
+		 */
+		if( in_array( 'all', $list ) ) {
+			return true;
+		}
+
+		/*
+		 * Try to find one of the declared types in the user's
+		 * credentials.
+		 */
+		foreach( $list as $type ) {
+			user::select( $type );
+			if( user::type() == $type ) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 

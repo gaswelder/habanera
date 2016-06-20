@@ -5,20 +5,55 @@
 class user
 {
 	/*
-	 * Since we share a global storage, we localise our data under a
-	 * single key.
+	 * Since we share a global storage, we localize our data by adding
+	 * a prefix, so saving data with key "key" is really saving it with
+	 * key KEY_PREFIX/$type/key.
 	 */
 	const KEY_PREFIX = '_userdata_';
-	/*
-	 * The key is used as a prefix, so saving data under key "key" is
-	 * really saving it under key "KEY_PREFIX"+"key".
-	 */
+	private static $type = 'guest';
 
 	/*
-	 * Set the user type and identifier. All previous data is cleaned.
+	 * Returns actual session data key for the given user key.
+	 */
+	private static function prefix( $key ) {
+		return self::KEY_PREFIX . '/' . self::$type . '/' . $key;
+	}
+
+	/*
+	 * Switches to another user type. If the user was not authenticated
+	 * for that type, all data values will be null.
+	 */
+	static function select( $type )
+	{
+		if( !self::type_valid( $type ) ) {
+			trigger_error( "Invalid type name" );
+			return;
+		}
+		self::$type = $type;
+	}
+
+	/*
+	 * Tells whether the type name is valid.
+	 */
+	private static function type_valid( $type )
+	{
+		/*
+		 * Type names must be non-empty strings without the slash
+		 * character since we use it to build session keys.
+		 */
+		return ( is_string( $type ) && $type != ''
+			&& strpos( $name, '/' ) === false );
+	}
+
+	/*
+	 * Sets the user type and identifier. All previous data is cleaned.
 	 */
 	static function auth( $type, $id = null )
 	{
+		if( !self::type_valid( $type ) ) {
+			trigger_error( "Invalid type name" );
+			return;
+		}
 		self::sclean();
 		self::sset( 'type', $type );
 		self::sset( 'id', $id );
@@ -69,7 +104,7 @@ class user
 	 */
 	private static function sset( $key, $value )
 	{
-		$key = self::KEY_PREFIX . $key;
+		$key = self::prefix( $key );
 		$s = &self::s();
 		if( $value === null ) {
 			unset( $s[$key] );
@@ -84,7 +119,7 @@ class user
 	 */
 	private static function sget( $key, $default = null )
 	{
-		$key = self::KEY_PREFIX . $key;
+		$key = self::prefix( $key );
 		$s = &self::s();
 		if( !isset( $s[$key] ) ){
 			return $default;
@@ -99,14 +134,14 @@ class user
 	private static function sclean()
 	{
 		$s = &self::s();
+		$pref = self::prefix( '' );
 		foreach( $s as $k => $v )
 		{
-			if( strpos( self::KEY_PREFIX, $k ) === 0 ) {
+			if( strpos( $pref, $k ) === 0 ) {
 				unset( $s[$k] );
 			}
 		}
 	}
-
 }
 
 ?>
