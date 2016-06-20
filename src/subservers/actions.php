@@ -78,6 +78,29 @@ function aurl( $args, $redirect_ok = null, $redirect_fail = null )
 	return htmlspecialchars( aurl_t( $args, $redirect_ok, $redirect_fail ) );
 }
 
+function action_button( $button_title, $action_name, $args,
+	$redirect_ok = null, $redirect_fail = null )
+{
+	ob_start();
+	$url = aurl( $action_name, $redirect_ok, $redirect_fail );
+	?>
+	<form method="post" action="<?= $url ?>">
+	<?php
+	foreach( $args as $name => $val )
+	{
+		$val = htmlspecialchars( $val );
+		$name = htmlspecialchars( $name );
+		?>
+		<input type="hidden" name="<?= $name ?>" value="<?= $val ?>">
+		<?php
+	}
+	?>
+		<button type="submit"><?= htmlspecialchars( $button_title ) ?></button>
+	</form>
+	<?php
+	return ob_get_clean();
+}
+
 class actions
 {
 	/*
