@@ -42,8 +42,28 @@ class ext_debug
 			$f .= "$r[class]$r[type]";
 		}
 		$f .= $r['function'];
-		$f .= "(...)";
+		$f .= '(' . self::format_args( $r['args'] ) . ')';
 		return $f;
+	}
+
+	private static function format_args( $args ) {
+		$parts = array();
+		foreach( $args as $arg )
+		{
+			if( !is_scalar( $arg ) ) {
+				$parts[] = gettype( $arg );
+				continue;
+			}
+
+			if( is_string( $arg ) ) {
+				if( mb_strlen( $arg ) > 20 ) {
+					$arg = mb_substr( $arg, 0, 17 ) . '...';
+				}
+				$arg = "'" . $arg . "'";
+			}
+			$parts[] = $arg;
+		}
+		return implode( ', ', $parts );
 	}
 
 	private static function format_src( $r )
