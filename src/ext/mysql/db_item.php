@@ -63,6 +63,10 @@ abstract class db_item
 	 */
 	function __construct( $item_id = null, $preload = '' )
 	{
+		if( $item_id === '' ) {
+			$item_id = null;
+		}
+
 		if( $item_id === null )
 		{
 			$this->exists = false;

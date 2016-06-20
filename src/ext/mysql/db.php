@@ -11,7 +11,7 @@ class DB
 	/*
 	 * Returns MySQL object.
 	 */
-	static function c()
+	private static function c()
 	{
 		if( self::$db ) return self::$db;
 		$url = setting( 'database' );
@@ -19,7 +19,7 @@ class DB
 			error( "Missing 'database' parameter" );
 			return null;
 		}
-		
+
 		self::$db = new __mysql( $url );
 		return self::$db;
 	}
