@@ -34,6 +34,14 @@ class uploads
 			$dest_dir .= '/';
 		}
 
+		/*
+		 * Create the directory if needed.
+		 */
+		if( !is_dir( $dest_dir ) && !@mkdir( $dest_dir ) ) {
+			error( "Could not create upload directory '$dest_dir'" );
+			return array();
+		}
+
 		$accepted = array();
 		$files = self::get_files( $input_name );
 		foreach( $files as $file )
