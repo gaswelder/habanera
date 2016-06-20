@@ -91,7 +91,11 @@ class h2
 	 */
 	static function main( $appdir, $base )
 	{
-		define( 'APP_DIR', 'appfiles/' );
+		if( !is_dir( $appdir ) ) {
+			error( "No directory '$appdir'" );
+			return false;
+		}
+		define( 'APP_DIR', realpath( $appdir ) . '/' );
 
 		/*
 		 * WRITE_DIR is a directory in which the script will be writing some
