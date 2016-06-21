@@ -1,18 +1,17 @@
 "use strict";
 (function(){
 
+var AUTO_ID = autoIdNeeded();
+var autoId = 0;
+
 window.addEventListener( 'load', createTOC );
 
-var AUTO_ID = autoIdNeeded();
-
-function autoIdNeeded()
-{
+function autoIdNeeded() {
 	var S = document.getElementsByTagName( 'script' );
 	var url = S[S.length-1].getAttribute( 'src' );
 	return url.indexOf( '?auto-id' ) > 0;
 }
 
-var autoId = 0;
 function nextId() {
 	return ++autoId;
 }

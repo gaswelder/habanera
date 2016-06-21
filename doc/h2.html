@@ -9,122 +9,352 @@
 
 <h1>H<sub>2</sub></h1>
 
-<article>
-	<h1>Pages</h1>
+<section id="setup">
+<h1>Setup</h1>
 
-	<p>Pages subserver is the default subserver which serves pages creating them from templates. Templates are stored in the "pages" directory of the application directory.</p>
+<p>This section is for those who need to install an existing site that uses the framework.</p>
 
-	<p>The URL path is mapped to the directories hierarchy inside the pages directory. If the request is /foo/bar, then the subserver will try to parse files pages/foo/bar.php, pages/foo/default.php, pages/foo.php, pages/default.php until one of them is found.</p>
+	<section id="framework">
+	<h1>The framework</h1>
 
-	<p>The trailing part of the URL will then be converted to the "arguments" accessible through the argv function. For example, if the request /foo/bar has resulted in the file pages/foo/default.php being called, then the arguments will be "default", "bar".</p>
+	<p>The framework itself comes as a folder that has to be copied somewhere with read-only permissions. It is up to the administrator to decide where to put the files. Let's assume that the files have been copied into the <code>/usr/lib/h2</code> directory.</p>
+	</section>
 
-	<article class="command">
-		<h1>The <code>add_link</code> function</h1>
+	<section id="appdir">
+	<h1>Application directory</h1>
 
-		<p class="disp"><code>add_link(<var>$rel</var>, <var>$href</var>)</code></p>
+	<p>The application directory contains all definitions and scripts
+	for the site. Let's assume that the application is named "app" and will be put in the directory <code>/home/webapps/app</code>.
+	</section>
 
-		<p>The <code>add_link</code> function adds a <code>&lt;link&gt;</code> element to the head section of the page, with <code>rel</code> and <code>href</code> attributes set to the given values.</p>
-	</article>
+	<section id="permissions">
+	<h1>Directory and file permissions</h1>
 
-	<article class="command">
-		<h1>add_js</h1>
-		<p><code>add_js($path)</code></p>
-		<p>The add_js function adds a reference to a JavaScript file. The path must be relative to the site root. References are added as &lt;script&gt; tags with the "src" attribute set to the URL inferred from the given path. The tags are added at the end of the page, before the closing &lt;/body&gt; tag.</p>
-	</article>
+	<p>The web server process needs only read permission for the
+	application files, so the entire directory may be owned by a
+	different user (probably the one maintaining the site).</p>
 
-	<article class="command">
-		<h1>The <code>add_css</code> function</h1>
+	<p>The only exception is the "writable directory" which by default
+	is assumed to be the <code>tmp</code> directory inside the
+	application directory. The web server's user needs to have full
+	permissions for that directory, so the administrator will have to
+	create and explicitly grant permissions for that single directory.
+	The administrator can also redefine the write directory to be
+	somewhere else, like <code>/var/webapps/app</code>, but that
+	directory shouldn't be in the <code>/tmp</code> directory as the
+	data that is written by the application can't always be thrown
+	away.</p>
+	</section>
 
-		<p class="disp"><code>add_css(<var>$path</var>, ...)</code></p>
+	<section id="web-content">
+	<h1>Static content</h1>
 
-		<p>The <code>add_css</code> function adds references to given stylesheets.</p>
+	<p>Static content like images, stylesheets and javascripts will be
+	in the web root directory, like with the usual static sites. There
+	are no specific recommendations for that expect the usual ones:
+	assign the files to a different user and give the server read-only
+	permissions.</p>
 
-		<p>The given paths must be relative to the site root. Paths may have query strings (<code>?name=val&amp;...</code>).</p>
+	<p>As with the application directory, there is one exception. If
+	the site allows uploading files into directories in the web tree,
+	then those directories will have to have write permissions for the
+	web server. It depends on the site which those directories are.</p>
+	</section>
 
-		<p>The references are added as <code>link</code> tags in the <code>head</code> section of the generated page. The function may be called at any time during the generation of the page.</p>
-	</article>
-</article>
+	<section id="entry">
+	<h1>Web entry point</h1>
 
-<article>
-	<h1>Actions subserver</h1>
+	<p>The entry point is the PHP script that will actually be called
+	by the web server for all URLs related to the application. All that
+	script has to do is to include the framework code and call
+	<code>h2main</code> passing the application directory path as the
+	first argument. So, in our example that will be:</p>
 
-	<article class="command">
-		<h1>The <code>declare_action</code> function</h1>
+<pre class="disp"><code>&lt;?php
+require '/usr/lib/h2/init.php';
+h2main('/home/webapps/app');
+?&gt;
+</code></pre>
 
-		<p class="disp"><code>declare_action(<var>$name</var>, <var>$users</var>, <var>$func</var>)</code></p>
+	<p>Before the <code>h2main</code> call the script may also have
+	some other setup operations, for example setting the
+	<code>error_log</code> directive or dealing with idiosyncrasies of
+	the hosting.</p>
 
-		<p>The <code>declare_action</code> function declares an action <var>name</var> and assigns <var>func</var> is the action function and <var>users</var> as the list of types of uses who can call that action.</p>
+	<p>After that the web server has to be configured in such a way as
+	to call the script for all related URLs. Typical case, especially
+	on a shared hosting, is the Apache web server running PHP scripts
+	and serving their output instead of serving the scripts themselves.
+	In that case we have to use mod_rewrite to make the URLs work. For
+	that, the <code>.htaccess</code> file should contain following:</p>
 
-		<p>The <var>users</var> variable should contain a comma-separated list of user types. If <code>all</code> is given, all user types will have access to the action.</p>
-	</article>
-</article>
+<pre class="disp">RewriteEngine	On
+RewriteCond	%{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
+RewriteCond	%{DOCUMENT_ROOT}/%{REQUEST_URI} !-d
+RewriteCond	%{REQUEST_URI}	!favicon\.ico
+RewriteRule	.	index.php</pre>
 
-<article>
-	<h1>Core</h1>
+	<p>Note that this doesn't necessarily have to be in the
+	<code>.htaccess</code> file, but typically is, due to the lack of
+	access to the server configuration file, or just plain conveniency.</p>
+	</section>
+</section>
 
-	<article class="command" id="poparg">
+
+<section id="operation">
+<h1>Introduction</h1>
+
+<p>This section is for those willing to understand how the framework
+functions when processing the requests.</p>
+
+	<section id="goal">
+	<h1>Goal</h1>
+
+	<p>The goal for the framework is to be as unobtrusive as possible.
+	There must not be demands to create special classes or files in
+	order to be able to output a simple string to the browser. Ideally,
+	one should be able to take a standalone PHP scrips, put it in the
+	necessary directory and have it run by the framework as usual.
+	After that the script could be gradually rewriten using the
+	functions of the framework, splitting other parts into actions or
+	templates, and so on.</p>
+
+	<p>As a result, a "hello, world" page may be written in one line:</p>
+
+	<p class="disp"><code>&lt;?php echo "Hello, world."; ?&gt;</code></p>
+	</section>
+
+	<section id="concepts">
+	<h1>Concepts</h1>
+
+	<p>A typical site deals with two types of requests: the requests that
+	return a page and the requests that result in some action being done on
+	the server side, without returning any page. The second kind of
+	requests typically ends with a redirect to the relevant "post-action"
+	page, so the user sees seamless transition between pages with the
+	action fultilled in between.</p>
+
+	<p>There are sites that don't make the distinction and may, for
+	example, process a user-submitted form and generate a page at the same
+	time. The user doesn't see the difference except that browsers refuse
+	to refresh such a page without sending the form data again. There might
+	be cases where such behaviour is desirable, but there are no such cases
+	that can't be reimplemented with this distinction in place.</p>
+
+	<p>This framework implements this distinction and names the scripts
+	that produce pages "pages" and scripts dedicated to some work like
+	processing POST requests "actions".</p>
+	</section>
+
+	<section id="subservers">
+	<h1>Subservers</h1>
+
+	<p>The core takes requests from the web server and dispatches them
+	to its own "subservers". A "subserver" is a function which takes a
+	request object, determines if it can fulfil it, and if it can,
+	fulfils is.</p>
+
+	<p>The script will call all registered subserver functions in the
+	order of their registration until one of them returns
+	<code>true</code> or there are no more functions to call.</p>
+
+	<p>The core itself defines a "pages" subserver which will be called
+	last and will try to serve a page by from the "pages"
+	directory.</p>
+	</section>
+
+	<section id="pages">
+		<h1>Pages</h1>
+
+		<p>Pages subserver is the default subserver which serves pages
+		creating them from templates. Templates are stored in the "pages"
+		directory of the application directory.</p>
+
+		<p>The URL path is mapped to the directories hierarchy inside the
+		pages directory. If the request is /foo/bar, then the subserver
+		will try to parse files pages/foo/bar.php, pages/foo/default.php,
+		pages/foo.php, pages/default.php until one of them is found.</p>
+
+		<p>The trailing part of the URL will then be converted to the
+		"arguments" accessible through the argv function. For example, if
+		the request /foo/bar has resulted in the file pages/foo/default.php
+		being called, then the arguments will be "default", "bar".</p>
+	</section>
+
+	<section id="settings">
+		<h1>Settings</h1>
+
+		<p>Some parameters may be defined in INI-files in the
+		application directory. The files are loaded on demand when the
+		<code>setting</code> function is first called. The default file
+		name is <code>settings.ini</code>. Parameters may be added or
+		overridden based on the host name. Thus, if the host name is
+		<code>foo.example.com</code>, then following files will be
+		loaded, if present:</p>
+
+		<ol>
+			<li><code>settings.ini</code></li>
+			<li><code>settings.com.ini</code></li>
+			<li><code>settings.com.example.ini</code></li>
+			<li><code>settings.com.example.foo.ini</code></li>
+		</ol>
+
+		<p>Note that neither of the files must be present, the
+		nonexistent paths will be skipped.</p>
+	</section>
+</section>
+
+<section id="reference">
+<h1>Reference</h1>
+
+	<section>
+	<h1>Core functions</h1>
+
+		<section class="command" id="current_url">
+		<h1>The <code>current_url</code> function</h1>
+
+		<p class="disp"><code><var>$url</var> = current_url();</code></p>
+
+		<p>The <code>current_url</code> functions returns the URL that is being
+		processed. The URL is returned as plain text, without HTML
+		escaping.</p>
+		</section>
+
+		<section class="command" id="poparg">
 		<h1>The <code>poparg</code> function</h1>
 
 		<p class="disp"><code><var>$arg</var> = poparg()</code></p>
 
-		<p>The <code>poparg</code> function returns next part of the parsed URL and shifts the base pointer one step further. If there are no more parts, <code>poparg</code> returns <code>null</code>.</p>
-	</article>
+		<p>The <code>poparg</code> function returns next part of the parsed URL
+		and shifts the base pointer one step further. If there are no more
+		parts, <code>poparg</code> returns <code>null</code>.</p>
+		</section>
 
-	<article>
-		<h1>Subservers</h1>
+		<section class="command">
+			<h1>The <code>add_link</code> function</h1>
 
-		<p>The core takes requests from the web server and dispatches them to its own "subservers". A "subserver" is a function which takes a request object, determines if it can fulfil it, and if it can, fulfils is.</p>
+			<p class="disp"><code>add_link(<var>$rel</var>, <var>$href</var>)</code></p>
 
-		<p>The script will call all registered subserver functions in the order of their registration until one of them returns <code>true</code> or there are no more functions to call.</p>
+			<p>The <code>add_link</code> function adds a <code>&lt;link&gt;</code> element to the head section of the page, with <code>rel</code> and <code>href</code> attributes set to the given values.</p>
+		</section>
 
-		<p>The core itself defines a "pages" subserver which will be called last and will try to serve a page by from the "pages" directory.</p>
+		<section class="command">
+			<h1>add_js</h1>
+			<p><code>add_js($path)</code></p>
+			<p>The add_js function adds a reference to a JavaScript file. The path must be relative to the site root. References are added as &lt;script&gt; tags with the "src" attribute set to the URL inferred from the given path. The tags are added at the end of the page, before the closing &lt;/body&gt; tag.</p>
+		</section>
 
-		<article class="command">
-			<h1>The <code>add_subserver</code> function</h1>
+		<section class="command">
+			<h1>The <code>add_css</code> function</h1>
 
-			<p><code>add_subserver($func)</code></p>
+			<p class="disp"><code>add_css(<var>$path</var>, ...)</code></p>
 
-			<p>The <code>add_subserver</code> function adds the function <var>func</var> to a list of request processing functions. The <var>func</var> function must have form:</p>
+			<p>The <code>add_css</code> function adds references to given stylesheets.</p>
 
-			<p><code>$ok = $func($request)</code>.</p>
+			<p>The given paths must be relative to the site root. Paths may have query strings (<code>?name=val&amp;...</code>).</p>
 
-			<p>If the function <var>func</var> will be called, it will receive a request object <var>request</var> and will have to determine whether to process it. If the function recognises the request and processes it, it must return <code>true</code>.</p>
+			<p>The references are added as <code>link</code> tags in the <code>head</code> section of the generated page. The function may be called at any time during the generation of the page.</p>
+		</section>
+
+		<section class="command">
+			<h1>The <code>declare_action</code> function</h1>
+
+			<p class="disp"><code>declare_action(<var>$name</var>, <var>$users</var>, <var>$func</var>)</code></p>
+
+			<p>The <code>declare_action</code> function declares an action <var>name</var> and assigns <var>func</var> is the action function and <var>users</var> as the list of types of uses who can call that action.</p>
+
+			<p>The <var>users</var> variable should contain a comma-separated list of user types. If <code>all</code> is given, all user types will have access to the action.</p>
+		</section>
+
+		<section class="command">
+			<h1>lib</h1>
+
+			<p><code>lib($name)</code></p>
+			<p>The lib function includes the file $name.php in the application's lib directory. This is a way to declaratively include libraries, typically used in application init scripts.</p>
+		</section>
+
+		<section class="command">
+			<h1>add_classes_dir</h1>
+			<p><code>add_classes_dir($dir)</code></p>
+			<p>Adds the given directory to the list of directories searched by the classes autoloader.</p>
+		</section>
+
+		<section class="command" id="load_ext">
+			<h1>The <code>load_ext</code> function</h1>
+
+			<p class="disp"><code>load_ext(<var>$name</var>, ...)</code></p>
+
+			<p>The <code>load_ext</code> function is similar to the <code>lib</code> function except the libraries are loaded from the extensions directory of the H<sub>2</sub> distribution.</p>
+
+			<p>The extensions are different from libraries in that they interact with H<sub>2</sub> API.</p>
+		</section>
+
+		<section class="command" id="error">
+			<h1>The <code>error</code> function</h1>
+
+			<p class="disp"><code>error(<var>$message<var>);</code></p>
+
+			<p>The <code>error</code> function is equivalent to the PHP <code>trigger_error</code> function with the level set to <code>E_USER_ERROR</code>.</p>
+
+			<p>All generated errors are treated as fatal (unless there is a custom errors handler that circumvents this). The <code>error</code> function thus assumes script termination with the "Internal Server" error.</p>
+		</section>
+
+		<section class="command" id="warning">
+			<h1>The <code>warning</code> function</h1>
+
+			<p class="disp"><code>warning(<var>$message</var>);</code></p>
+
+			<p>The <code>warning</code> function is intended to report potential errors, as opposed to the <code>error</code> function which typically assumes that the script shouldn't continue.</p>
+
+			<p>If the <code>debug</code> parameter is set to <code>1</code>, the <code>warning</code> function is equivalent to the <code>error</code> function. Otherwise it just prints the message to the error log without triggering any error handlers.</p>
+		</section>
+
+		<section class="command">
+			<h1>log_message</h1>
+		</section>
+
+		<section class="command" id="setting">
+			<h1>The <code>setting</code> function</h1>
+
+			<p class="disp"><code><var>$val</var> = setting(<var>$name</var>);</code></p>
+
+			<p>The <code>setting</code> function returns the value of the <var>name</var> parameter as defined in the corresponding settings file in the application directory. If the parameter is not defined, <code>null</code> is returned.</p>
+		</section>
+	</section>
 
 
-		</article>
-	</article>
-</article>
-
-<article>
-	<h1>Library</h1>
-	<article>
+	<section>
 		<h1>HTTP header functions</h1>
 
-		<article class="command">
+		<section class="command" id="req_header">
 			<h1>The <code>req_header</code> function</h1>
 
-			<p class="disp"><code><var>$value</var> = req_header(<var>$name</var>)</code></p>
+			<p class="disp"><code><var>$value</var> = req_header(<var>$name</var>);</code></p>
 
-			<p>The <code>req_header</code> function returns the value of the request header <var>$name</var>, if one is given, or <code>null</code> if not.</p>
-		</article>
+			<p>The <code>req_header</code> function returns the value of the request header <var>$name</var>, if one is given by the client, or <code>null</code> if not.</p>
+		</section>
 
-		<article class="command">
-			<h1>The <code>redirect</code> function</h1>
-
-			<p><code>redirect($url)</code></p>
-
-			<p>The <code>redirect</code> function writes appropriate HTTP headers to the output to redirect the browser to the given URL. The script execution is stopped after that.</p>
-		</article>
-
-		<article class="command">
+		<section class="command" id="http_status">
 			<h1>The <code>http_status</code> function</h1>
 
 			<p class="disp"><code>http_status(<var>$code</var>)</code></p>
 
 			<p>The <code>http_status</code> function adds to the output an HTTP status header corresponding to the given HTTP status code.</p>
-		</article>
 
-		<article class="command">
+			<p>This function is intended for extensions, like the images subserver, that need more control over the headers.</p>
+		</section>
+
+		<section class="command" id="redirect">
+			<h1>The <code>redirect</code> function</h1>
+
+			<p class="disp"><code>redirect(<var>$url</var>, <var>$code</var>=302);</code></p>
+
+			<p>The <code>redirect</code> function writes appropriate HTTP headers to the output to redirect the browser to the given URL and stops the script execution.</p>
+
+			<p>By default the redirect is accompanied by the <code>302 Found</code> HTTP status header. The <var>code</var> variable may specify another code, like <code>303</code> for the <code>See Other</code> status.</p>
+		</section>
+
+		<section class="command">
 			<h1>The error_* functions</h1>
 
 			<p><code>error_&lt;<i>type</i>&gt;()</code></p>
@@ -163,262 +393,237 @@
 					<td>We screwed up.</td>
 				</tr>
 			</table>
-		</article>
+		</section>
 
-		<article class="command">
+		<section class="command">
 			<h1>announce_*</h1>
 			announce_json($charset='UTF-8')
 			announce_txt($charset='UTF-8')
 			announce_html($charset='UTF-8')
-		</article>
+		</section>
 
-		<article class="command">
+		<section class="command">
 			<h1>announce_file</h1>
 			<p><code>announce_file($filename, $size=null)</code></p>
-		</article>
-	</article>
+		</section>
+	</section>
 
-	<article>
-		<h1>Errors and logging</h1>
 
-		<article class="command" id="on_error">
-			<h1>The <code>on_error</code> function</h1>
 
-			<p class="disp"><code>on_error(<var>$func</var>)</code></p>
-
-			<p>The <code>on_error</code> function adds the given function <var>$func</var> to the list of functions called when errors occur. The last added function will be called first.</p>
-
-			<p>The function <var>func</var> must have form:</p>
-
-			<p class="disp"><code><var>$ok</var> = <var>$func</var>(<var>$msg</var>, <var>$line</var>)</code></p>
-
-			<p class="cont">where <var>$msg</var> is an error message and <var>$line</var> is a string in form "&lt;file&nbsp;path&gt;:&lt;line&nbsp;number&gt;" specifying the line where the error occured.</p>
-
-			<p>If <var>$func</var> returns <code>true</code>, the rest of the error functions will not be called.</p>
-		</article>
-
-		<article class="command">
-			<h1>error</h1>
-			<p><code>error($message)</code></p>
-			<p>Writes a message to the log and stops the execution. The browser will receive an "Internal server error" response.</p>
-		</article>
-
-		<article class="command">
-			<h1>warning</h1>
-			<p><code>warning($message)</code></p>
-			<p>Writes the message to the log. Intended to mark potential errors.</p>
-		</article>
-
-		<article class="command">
-			<h1>log_message</h1>
-		</article>
-	</article>
-
-	<article>
-		<h1>Loading components</h1>
-
-		<article class="command">
-			<h1>lib</h1>
-
-			<p><code>lib($name)</code></p>
-			<p>The lib function includes the file $name.php in the application's lib directory. This is a way to declaratively include libraries, typically used in application init scripts.</p>
-		</article>
-
-		<article class="command">
-			<h1>add_classes_dir</h1>
-			<p><code>add_classes_dir($dir)</code></p>
-			<p>Adds the given directory to the list of directories searched by the classes autoloader.</p>
-		</article>
-
-		<article class="command" id="load_ext">
-			<h1>The <code>load_ext</code> function</h1>
-
-			<p class="disp"><code>load_ext(<var>$name</var>, ...)</code></p>
-
-			<p>The <code>load_ext</code> function is similar to the <code>lib</code> function except the libraries are loaded from the extensions directory of the H<sub>2</sub> distribution.</p>
-
-			<p>The extensions are different from libraries in that they interact with H<sub>2</sub> API.</p>
-		</article>
-	</article>
-
-	<article>
+	<section id="debug">
 		<h1>Debugging</h1>
-		<article class="command">
-			<h1>e</h1>
-		</article>
 
-		<article class="command">
+		<section class="command">
 			<h1>ob_destroy</h1>
-		</article>
 
-		<article class="command">
-			<h1>msg</h1>
-		</article>
+			<p>Discards all buffered output. This can be used to
+			prevent other output from hiding debug messages.</p>
+		</section>
 
-		<article class="command">
-			<h1>debug</h1>
-		</article>
-	</article>
+		<section class="command" id="e">
+			<h1>e</h1>
 
-	<article>
-		<h1>Configuration</h1>
+			<p class="disp"><code>e(<var>$var</var>);</code></p>
 
-		<article class="command">
-			<h1>setting</h1>
-		</article>
-	</article>
+			<p>Calls ob_destroy, var_dump($var) and exit.</p>
+		</section>
 
-	<article>
+		<section class="command">
+			<h1>The <code>debug</code> parameter</h1>
+
+			<p>If set to 1, all warnings are treated as errors.</p>
+		</section>
+	</section>
+
+	<section>
 		<h1>Request data</h1>
-		<article class="command">
+		<section class="command">
 			<h1>vars::get</h1>
-		</article>
+		</section>
 
-		<article class="command">
+		<section class="command">
 			<h1>vars::post</h1>
-		</article>
+		</section>
 
-		<article class="command">
+		<section class="command">
 			<h1>vars::posts</h1>
-		</article>
-	</article>
+		</section>
+	</section>
 
-	<article id="uploads">
+	<section id="uploads">
 		<h1>File uploads</h1>
 
-		<article class="command" id="uploaded_files">
+		<section class="command" id="uploaded_files">
 			<h1>The <code>uploaded_files</code> function</h1>
 
 			<p class="disp"><code><var>$files</var> = uploaded_files(<var>$input_name</var>)</code></p>
 
 			<p>The <code>uploaded_files</code> function returns descriptions of uploaded files stored in the <code>$_FILES</code> global array under the index <var>$input_name</var>, converting the single-file case to the general multiple-files form. Each element of the <var>$files</var> array is an associative array with fields <code>name</code>, <code>type</code>, <code>tmp_name</code>, <code>size</code> and <code>error</code>.</p>
-		</article>
+		</section>
 
-		<article class="command" id="accept_uploads">
+		<section class="command" id="accept_uploads">
 			<h1>The <code>accept_uploads</code> function</h1>
 
 			<p class="disp"><code><var>$paths</var> = accept_uploads(<var>$input_name</var>, <var>$dirpath</var>)</code></p>
 
 			<p>The <code>accept_uploads</code> function processes the uploaded files using <var>$input_name</var> as index to the <code>$_FILES</code> global array, moves all uploaded files to the directory <var>$dirpath</var> assigning them random names and returns an array of paths to the new files.</p>
-		</article>
-	</article>
+		</section>
+	</section>
 
-	<article>
+	<section>
 		<h1>Writing files</h1>
 
-		<article class="command">
+		<section class="command">
 			<h1><code>files::save</code></h1>
 
 			<p class="disp"><code><var>$ok</var> = files::save(<var>$dir</var>, <var>$name</var>, <var>$contents</var>)</code></p>
 
 			<p>Saves given contents to the file named <var>$name</var> in the directory <var>$dir</var>.</p>
-		</article>
+		</section>
 
-		<article class="command">
+		<section class="command">
 			<h1>files::get</h1>
-		</article>
+		</section>
 
-		<article class="command">
+		<section class="command">
 			<h1>files::append</h1>
-		</article>
+		</section>
 
-		<article class="command">
+		<section class="command">
 			<h1>files::time</h1>
-		</article>
-	</article>
+		</section>
+	</section>
 
-	<article>
-		<h1>Sessions</h1>
+	<section id="user">
+		<h1>Session control</h1>
 
-		<article class="command">
-			<h1>user::auth</h1>
-		</article>
+		<section class="command" id="user-auth">
+			<h1>The <code>user::auth</code> function</h1>
 
-		<article class="command">
-			<h1>user::get_type</h1>
-		</article>
+			<p class="disp"><code>user::auth(<var>$type</var>, <var>$id</var>=null);</code></p>
 
-		<article class="command">
-			<h1>user::get_id</h1>
-		</article>
+			<p>The <code>auth</code> function adds the pair
+			(<var>type</var>, <var>id</var>) to the user's list of
+			credentials.</p>
 
-		<article class="command">
-			<h1>user::set_data</h1>
-		</article>
+			<p>The identifier is secondary to the user type and may be
+			omitted. It is a normal value as if it was set using the
+			<code>set</code> function, only brought up for convenience
+			since applications often need to use identifiers along with
+			types.</p>
 
-		<article class="command">
-			<h1>user::get_data</h1>
-		</article>
-	</article>
+			<p>If there is a pair with the same type, it is replaced.
+			All the additional data related to the discarded type is
+			cleared.</p>
+		</section>
 
-</article>
+		<section class="command" id="user-type">
+			<h1>The <code>user::type</code> function</h1>
 
-<article>
-	<h1>Configuration parameters</h1>
+			<p class="disp"><code><var>$type</var> = user::type();</code></p>
 
-	Constants
-	APP_DIR
-	WRITE_DIR
-	SITE_ROOT
+			<p>The <code>type</code> function returns the type of the user's current identity.</p>
+		</section>
 
+		<section class="command" id="user-id">
+			<h1>The <code>user::id</code> function</h1>
 
-	<table class="dl">
-		<tr>
-			<th>Parameter</th>
-			<th>Default</th>
-			<th>Description</th>
-		</tr>
+			<p class="disp"><code><var>$id</var> = user::id();</code></p>
 
-		<tr>
-			<td>debug</td>
-			<td>0</td>
-			<td>Set to 1 to enable debugging checks. This will affect every function that checks for return value of the debug function. In particular, warnings will be treated as errors.</td>
-		</tr>
+			<p>The <code>id</code> function returns the identifier of the user's current identity.</p>
+		</section>
 
+		<section class="command">
+			<h1>The <code>user::set</code> function</h1>
+		</section>
 
-		<tr>
-			<td>log_actions</td>
-			<td>0</td>
-			<td>Set to 1 to make the actions subserver write all successful actions to a log file.</td>
-		</tr>
+		<section class="command">
+			<h1>The <code>user::get</code> function</h1>
+		</section>
+	</section>
 
-		<tr>
-			<td>mysql_host</td>
-			<td>localhost</td>
-			<td></td>
-		</tr>
-		<tr>
-			<td>mysql_user</td>
-			<td></td>
-			<td></td>
-		</tr>
-	</table>
+	<section>
+	<h1>Functions for writing extensions</h1>
 
-</article>
+		<section class="command">
+		<h1>The <code>add_subserver</code> function</h1>
+
+		<p><code>add_subserver($func)</code></p>
+
+		<p>The <code>add_subserver</code> function adds the function <var>func</var> to a list of request processing functions. The <var>func</var> function must have form:</p>
+
+		<p><code>$ok = $func($request)</code>.</p>
+
+		<p>If the function <var>func</var> will be called, it will receive a request object <var>request</var> and will have to determine whether to process it. If the function recognises the request and processes it, it must return <code>true</code>.</p>
+		</section>
+
+		<section class="command" id="on_error">
+		<h1>The <code>on_error</code> function</h1>
+
+		<p class="disp"><code>on_error(<var>$func</var>);</code></p>
+
+		<p>The <code>on_error</code> function adds the given function <var>$func</var> to the list of functions called when errors occur. The last added function will be called first.</p>
+
+		<p>The function <var>func</var> must have form:</p>
+
+		<p class="disp"><code><var>$ok</var> = <var>$func</var>(<var>$msg</var>, <var>$line</var>);</code></p>
+
+		<p class="cont">where <var>$msg</var> is an error message and <var>$line</var> is a string in form "<var>file&nbsp;path</var>:<var>line&nbsp;number</var>" specifying where the error occured.</p>
+
+		<p>If <var>$func</var> returns <code>true</code>, the rest of the error functions will not be called.</p>
+		</section>
+	</section>
+</section>
 
 <section id="extensions">
 	<h1>Extensions</h1>
 
-	<article id="ext_debug">
+	<section id="ext_debug">
 		<h1>The <code>ext_debug</code> extension</h1>
 
 		<p>The <code>ext_debug</code> extension catches all errors and outputs execution stacks terminating the script. It does nothing if the <code>debug</code> parameter is not set to <code>1</code>.</p>
-	</article>
+	</section>
 
-	<article id="images">
-		<h1>The <code>images</code> subserver</h1>
+	<section id="images">
+		<h1>The images subserver</h1>
 
-		<article class="command" id="imgcache">
+		<p>This subserver generates image previews from original full-sized image files stored on disk. This task is typical for shops, blogs and other sites dealing with image files of different sizes uploaded by users.</p>
+
+		<p>The original image is served by the web server itself. But if the same image path is "decorated" with a size marker, then the subserver serves the resized version of that image, creating it in cache if needed. The decorated URLs are created by the <code>image_url</code> function.</p>
+
+		<p>The subserver supports caching by browsers using the <code>ETag</code> and related HTTP headers.</p>
+
+		<p>There is a hard size limit for the images that can be
+		processed that is set to 2&nbsp;megabytes. If the original
+		image exceeds that size, then all requests to the resized
+		copies will return the "Not Found" error, since there will be
+		no actual copies, and a warning will be written in the errors
+		log.</p>
+
+		<section class="command" id="image_url">
+			<h1>The <code>image_url</code> function</h1>
+
+			<p class="disp"><code><var>$url</var> = image_url(<var>$imgpath</var>, <var>$width</var>=null, <var>$height</var>=null);</code></p>
+
+			<p>The <code>image_url</code> function creates the URL for the copy of the image found at <var>imgpath</var> with width limited to <var>$width</var> pixels and height limited to <var>$height</var> pixels.</p>
+
+			<p>Both <var>width</var> and <var>height</var> are optional. If none of the limits is given, the original URL is returned.</p>
+
+			<p>The created copy is never enlarged. If the original size is less than the given limits, the original URL will be returned.</p>
+		</section>
+
+		<section class="command" id="imgcache">
 			<h1>The <code>imgcache</code> parameter</h1>
 
 			<p>The <code>imgcache</code> parameter defines the path to the directory where preview copies of images will be stored. If the parameter is not defined, then <code><var>WRITE_DIR</var>/image-previews</code> is assumed.</p>
 
-			<p>Regardless of the path the script must have write permissions for that directory. If it doesn't exist, the script must be able to create it.</p>
-		</article>
-	</article>
+			<p>Regardless of the path the script must have write permissions for that directory. If the directory doesn't exist, the script must be able to create it.</p>
+		</section>
+
+	</section>
 </section>
 
-<script src="toc.js?auto-id"></script>
+<script src="toc.js"></script>
 
 </body>
 </html>
