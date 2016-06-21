@@ -53,16 +53,16 @@ class settings
 	 * "settings.<host name postfix>.ini".
 	 * For host "foo.example.com" these files will be loaded
 	 * (if present) in this sequence:
-	 * settings.com, settings.example.com, settings.foo.example.com.
+	 * settings.com.ini, settings.com.example.ini,
+	 * settings.com.example.foo.ini.
 	 */
 	private static function load_specifics()
 	{
-		$host = explode( '.', $_SERVER['HTTP_HOST'] );
-		$n = count( $host );
-		$postfix = '';
-		for( $i = $n-1; $i >= 0; $i-- ) {
-			$postfix = '.'.$host[$i].$postfix;
-			self::load( 'settings'.$postfix.'.ini' );
+		$parts = array_reverse( explode( '.', $_SERVER['HTTP_HOST'] ) );
+		$name = 'settings';
+		foreach( $parts as $part ) {
+			$name .= ".$part";
+			self::load( "$name.ini" );
 		}
 	}
 
