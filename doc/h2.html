@@ -256,6 +256,28 @@ functions when processing the requests.</p>
 			<p>The references are added as <code>link</code> tags in the <code>head</code> section of the generated page. The function may be called at any time during the generation of the page.</p>
 		</section>
 
+		<section class="command" id="set-title">
+			<h1>The <code>set_title</code> function</h1>
+
+			<p class="disp"><code>set_title(<var>$title</var>);</code></p>
+
+			<p>The <code>set_title</code> function sets the page title
+			which will be substituted in the generated HTML output in
+			the <code>title</code> tag. If the template already has the
+			<code>title</code> tag with a title in it, the title will
+			be replaced.</p>
+		</section>
+
+		<section class="command" id="get-title">
+			<h1>The <code>get_title</code> function</h1>
+
+			<p class="disp"><code><var>$title</var> = get_title();</code></p>
+
+			<p>The <code>get_title</code> function returns the page
+			title that was set using the <code>set_title</code>
+			function or <code>null</code> if the title wasn't set.</p>
+		</section>
+
 		<section class="command">
 			<h1>The <code>declare_action</code> function</h1>
 

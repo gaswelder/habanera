@@ -2,8 +2,12 @@
 /*
  * Set page <title>.
  */
-function set_page_title( $title ) {
+function set_title( $title ) {
 	pages::set_title( $title );
+}
+
+function get_title() {
+	return pages::get_title();
 }
 
 function set_page_meta( $name, $content ) {
@@ -209,6 +213,10 @@ class pages
 
 	static function set_title( $title ) {
 		self::$title = $title;
+	}
+
+	static function get_title() {
+		return self::$title;
 	}
 
 	private static function insert_head( &$src )
