@@ -1,15 +1,7 @@
 <?php
 
-function set_default_language( $lang ) {
-	return lang::set_default_language( $lang );
-}
-
-function get_default_language() {
-	return lang::get_default_language();
-}
-
 function t( $text ) {
-	return lang::get_message( $text );
+	return lang::lookup( $text );
 }
 
 lang::init();
@@ -38,7 +30,7 @@ class lang
 		self::$lang = $lang;
 	}
 
-	static function set_default_language( $lang )
+	static function set( $lang )
 	{
 		if( !self::valid( $lang ) ) {
 			error( "Invalid language id: '$lang'" );
@@ -47,11 +39,11 @@ class lang
 		self::$lang = $lang;
 	}
 
-	static function get_default_language() {
+	static function get() {
 		return self::$lang;
 	}
 
-	static function get_message( $msgid, $lang = null )
+	static function lookup( $msgid, $lang = null )
 	{
 		if( $lang && !self::valid( $lang ) ) {
 			error( "Invalid language id: '$lang'" );
