@@ -10,157 +10,170 @@
 <h1>H<sub>2</sub></h1>
 
 <section id="setup">
-<h1>Setup</h1>
+	<h1>Setup</h1>
 
-<p>This section is for those who need to install an existing site that uses the framework.</p>
+	<p>This section is for those who need to install an existing site
+	that uses the framework.</p>
 
 	<section id="framework">
-	<h1>The framework</h1>
+		<h1>The framework</h1>
 
-	<p>The framework itself comes as a folder that has to be copied somewhere with read-only permissions. It is up to the administrator to decide where to put the files. Let's assume that the files have been copied into the <code>/usr/lib/h2</code> directory.</p>
+		<p>The framework itself comes as a folder that has to be copied
+		somewhere with read-only permissions. It is up to the
+		administrator to decide where to put the files. Let's assume
+		that the files have been copied into the
+		<code>/usr/lib/h2</code> directory.</p>
 	</section>
 
 	<section id="appdir">
-	<h1>Application directory</h1>
+		<h1>Application directory</h1>
 
-	<p>The application directory contains all definitions and scripts
-	for the site. Let's assume that the application is named "app" and will be put in the directory <code>/home/webapps/app</code>.
+		<p>The application directory contains all definitions and
+		scripts for the site. Let's assume that the application is
+		named "app" and will be put in the directory
+		<code>/home/webapps/app</code>.
 	</section>
 
 	<section id="permissions">
-	<h1>Directory and file permissions</h1>
+		<h1>Directory and file permissions</h1>
 
-	<p>The web server process needs only read permission for the
-	application files, so the entire directory may be owned by a
-	different user (probably the one maintaining the site).</p>
+		<p>The web server process needs only read permission for the
+		application files, so the entire directory may be owned by a
+		different user (probably the one maintaining the site).</p>
 
-	<p>The only exception is the "writable directory" which by default
-	is assumed to be the <code>tmp</code> directory inside the
-	application directory. The web server's user needs to have full
-	permissions for that directory, so the administrator will have to
-	create and explicitly grant permissions for that single directory.
-	The administrator can also redefine the write directory to be
-	somewhere else, like <code>/var/webapps/app</code>, but that
-	directory shouldn't be in the <code>/tmp</code> directory as the
-	data that is written by the application can't always be thrown
-	away.</p>
+		<p>The only exception is the "writable directory" which by
+		default is assumed to be the <code>tmp</code> directory inside
+		the application directory. The web server's user needs to have
+		full permissions for that directory, so the administrator will
+		have to create and explicitly grant permissions for that single
+		directory. The administrator can also redefine the write
+		directory to be somewhere else, like
+		<code>/var/webapps/app</code>, but that directory shouldn't be
+		in the <code>/tmp</code> directory as the data that is written
+		by the application can't always be thrown away.</p>
 	</section>
 
 	<section id="web-content">
-	<h1>Static content</h1>
+		<h1>Static content</h1>
 
-	<p>Static content like images, stylesheets and javascripts will be
-	in the web root directory, like with the usual static sites. There
-	are no specific recommendations for that expect the usual ones:
-	assign the files to a different user and give the server read-only
-	permissions.</p>
+		<p>Static content like images, stylesheets and javascripts will
+		be in the web root directory, like with the usual static sites.
+		There are no specific recommendations for that expect the usual
+		ones: assign the files to a different user and give the server
+		read-only permissions.</p>
 
-	<p>As with the application directory, there is one exception. If
-	the site allows uploading files into directories in the web tree,
-	then those directories will have to have write permissions for the
-	web server. It depends on the site which those directories are.</p>
+		<p>As with the application directory, there is one exception.
+		If the site allows uploading files into directories in the web
+		tree, then those directories will have to have write
+		permissions for the web server. It depends on the site which
+		those directories are.</p>
 	</section>
 
 	<section id="entry">
-	<h1>Web entry point</h1>
+		<h1>Web entry point</h1>
 
-	<p>The entry point is the PHP script that will actually be called
-	by the web server for all URLs related to the application. All that
-	script has to do is to include the framework code and call
-	<code>h2main</code> passing the application directory path as the
-	first argument. So, in our example that will be:</p>
+		<p>The entry point is the PHP script that will actually be
+		called by the web server for all URLs related to the
+		application. All that script has to do is to include the
+		framework code and call <code>h2main</code> passing the
+		application directory path as the first argument. So, in our
+		example that will be:</p>
 
-<pre class="disp"><code>&lt;?php
-require '/usr/lib/h2/init.php';
-h2main('/home/webapps/app');
-?&gt;
-</code></pre>
+		<p class="disp"><code>&lt;?php<br>
+		require '/usr/lib/h2/init.php';<br>
+		h2main('/home/webapps/app');<br>
+		?&gt;</code></p>
 
-	<p>Before the <code>h2main</code> call the script may also have
-	some other setup operations, for example setting the
-	<code>error_log</code> directive or dealing with idiosyncrasies of
-	the hosting.</p>
 
-	<p>After that the web server has to be configured in such a way as
-	to call the script for all related URLs. Typical case, especially
-	on a shared hosting, is the Apache web server running PHP scripts
-	and serving their output instead of serving the scripts themselves.
-	In that case we have to use mod_rewrite to make the URLs work. For
-	that, the <code>.htaccess</code> file should contain following:</p>
+		<p>Before the <code>h2main</code> call the script may also have
+		some other setup operations, for example setting the
+		<code>error_log</code> directive or dealing with idiosyncrasies
+		of the hosting.</p>
 
-<pre class="disp">RewriteEngine	On
-RewriteCond	%{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
-RewriteCond	%{DOCUMENT_ROOT}/%{REQUEST_URI} !-d
-RewriteCond	%{REQUEST_URI}	!favicon\.ico
-RewriteRule	.	index.php</pre>
+		<p>After that the web server has to be configured in such a way
+		as to call the script for all related URLs. Typical case,
+		especially on a shared hosting, is the Apache web server
+		running PHP scripts and serving their output instead of serving
+		the scripts themselves. In that case we have to use mod_rewrite
+		to make the URLs work. For that, the <code>.htaccess</code>
+		file should contain following:</p>
 
-	<p>Note that this doesn't necessarily have to be in the
-	<code>.htaccess</code> file, but typically is, due to the lack of
-	access to the server configuration file, or just plain conveniency.</p>
+		<p class="disp"><code>RewriteEngine	On<br>
+		RewriteCond	%{DOCUMENT_ROOT}/%{REQUEST_URI} !-f<br>
+		RewriteCond	%{DOCUMENT_ROOT}/%{REQUEST_URI} !-d<br>
+		RewriteCond	%{REQUEST_URI}	!favicon\.ico
+		RewriteRule	.	index.php</code></p>
+
+		<p>Note that this doesn't necessarily have to be in the
+		<code>.htaccess</code> file, but typically is, due to the lack
+		of access to the server configuration file, or just plain
+		conveniency.</p>
 	</section>
 </section>
 
 
-<section id="operation">
-<h1>Introduction</h1>
+<section id="intro">
+	<h1>Introduction</h1>
 
-<p>This section is for those willing to understand how the framework
-functions when processing the requests.</p>
+	<p>This section is for those willing to understand how the
+	framework functions when processing the requests.</p>
 
 	<section id="goal">
-	<h1>Goal</h1>
+		<h1>Goal</h1>
 
-	<p>The goal for the framework is to be as unobtrusive as possible.
-	There must not be demands to create special classes or files in
-	order to be able to output a simple string to the browser. Ideally,
-	one should be able to take a standalone PHP scrips, put it in the
-	necessary directory and have it run by the framework as usual.
-	After that the script could be gradually rewriten using the
-	functions of the framework, splitting other parts into actions or
-	templates, and so on.</p>
+		<p>The goal for the framework is to be as unobtrusive as
+		possible. There must not be demands to create special classes
+		or files in order to be able to output a simple string to the
+		browser. Ideally, one should be able to take a standalone PHP
+		script and have it run by the framework without any changes.
+		After that the script could be gradually rewriten using the
+		functions of the framework, splitting other parts into actions
+		or templates, and so on.</p>
 
-	<p>As a result, a "hello, world" page may be written in one line:</p>
+		<p>As a result, a "hello, world" page may be written in one line:</p>
 
-	<p class="disp"><code>&lt;?php echo "Hello, world."; ?&gt;</code></p>
+		<p class="disp"><code>&lt;?php echo "Hello, world."; ?&gt;</code></p>
 	</section>
 
 	<section id="concepts">
-	<h1>Concepts</h1>
+		<h1>Concepts</h1>
 
-	<p>A typical site deals with two types of requests: the requests that
-	return a page and the requests that result in some action being done on
-	the server side, without returning any page. The second kind of
-	requests typically ends with a redirect to the relevant "post-action"
-	page, so the user sees seamless transition between pages with the
-	action fultilled in between.</p>
+		<p>A typical site deals with two types of requests: the
+		requests that return a page and the requests that result in
+		some action being done on the server side, without returning
+		any page. The second kind of requests typically ends with a
+		redirect to the relevant "post-action" page, so the user sees
+		seamless transition between pages with the action fultilled in
+		between.</p>
 
-	<p>There are sites that don't make the distinction and may, for
-	example, process a user-submitted form and generate a page at the same
-	time. The user doesn't see the difference except that browsers refuse
-	to refresh such a page without sending the form data again. There might
-	be cases where such behaviour is desirable, but there are no such cases
-	that can't be reimplemented with this distinction in place.</p>
+		<p>There are sites that don't make the distinction and may, for
+		example, process a user-submitted form and generate a page at
+		the same time. The user doesn't see the difference except that
+		browsers refuse to refresh such a page without sending the form
+		data again. There might be cases where such behaviour is
+		desirable, but there are no such cases that can't be
+		reimplemented with this distinction in place.</p>
 
-	<p>This framework implements this distinction and names the scripts
-	that produce pages "pages" and scripts dedicated to some work like
-	processing POST requests "actions".</p>
+		<p>This framework implements this distinction and names the
+		scripts that produce pages "pages" and scripts dedicated to
+		some work like processing POST requests "actions".</p>
 	</section>
 
 	<section id="subservers">
-	<h1>Subservers</h1>
+		<h1>Subservers</h1>
 
-	<p>The core takes requests from the web server and dispatches them
-	to its own "subservers". A "subserver" is a function which takes a
-	request object, determines if it can fulfil it, and if it can,
-	fulfils is.</p>
+		<p>The core takes requests from the web server and dispatches
+		them to its own "subservers". A "subserver" is a function which
+		takes a request object, determines if it can fulfil it, and if
+		it can, fulfils is.</p>
 
-	<p>The script will call all registered subserver functions in the
-	order of their registration until one of them returns
-	<code>true</code> or there are no more functions to call.</p>
+		<p>The script will call all registered subserver functions in
+		the order of their registration until one of them returns
+		<code>true</code> or there are no more functions to call.</p>
 
-	<p>The core itself defines a "pages" subserver which will be called
-	last and will try to serve a page by from the "pages"
-	directory.</p>
+		<p>The core itself defines a "pages" subserver which will be
+		called last and will try to serve a page by from the "pages"
+		directory.</p>
 	</section>
 
 	<section id="pages">
@@ -205,87 +218,30 @@ functions when processing the requests.</p>
 </section>
 
 <section id="reference">
-<h1>Reference</h1>
+	<h1>Reference</h1>
 
 	<section>
-	<h1>Core functions</h1>
+		<h1>Core functions</h1>
 
 		<section class="command" id="current_url">
-		<h1>The <code>current_url</code> function</h1>
+			<h1>The <code>current_url</code> function</h1>
 
-		<p class="disp"><code><var>$url</var> = current_url();</code></p>
+			<p class="disp"><code><var>$url</var> = current_url();</code></p>
 
-		<p>The <code>current_url</code> functions returns the URL that is being
-		processed. The URL is returned as plain text, without HTML
-		escaping.</p>
+			<p>The <code>current_url</code> functions returns the URL
+			that is being processed. The URL is returned as plain text,
+			without HTML escaping.</p>
 		</section>
 
 		<section class="command" id="poparg">
-		<h1>The <code>poparg</code> function</h1>
+			<h1>The <code>poparg</code> function</h1>
 
-		<p class="disp"><code><var>$arg</var> = poparg()</code></p>
+			<p class="disp"><code><var>$arg</var> = poparg()</code></p>
 
-		<p>The <code>poparg</code> function returns next part of the parsed URL
-		and shifts the base pointer one step further. If there are no more
-		parts, <code>poparg</code> returns <code>null</code>.</p>
-		</section>
-
-		<section class="command">
-			<h1>The <code>add_link</code> function</h1>
-
-			<p class="disp"><code>add_link(<var>$rel</var>, <var>$href</var>)</code></p>
-
-			<p>The <code>add_link</code> function adds a <code>&lt;link&gt;</code> element to the head section of the page, with <code>rel</code> and <code>href</code> attributes set to the given values.</p>
-		</section>
-
-		<section class="command">
-			<h1>add_js</h1>
-			<p><code>add_js($path)</code></p>
-			<p>The add_js function adds a reference to a JavaScript file. The path must be relative to the site root. References are added as &lt;script&gt; tags with the "src" attribute set to the URL inferred from the given path. The tags are added at the end of the page, before the closing &lt;/body&gt; tag.</p>
-		</section>
-
-		<section class="command">
-			<h1>The <code>add_css</code> function</h1>
-
-			<p class="disp"><code>add_css(<var>$path</var>, ...)</code></p>
-
-			<p>The <code>add_css</code> function adds references to given stylesheets.</p>
-
-			<p>The given paths must be relative to the site root. Paths may have query strings (<code>?name=val&amp;...</code>).</p>
-
-			<p>The references are added as <code>link</code> tags in the <code>head</code> section of the generated page. The function may be called at any time during the generation of the page.</p>
-		</section>
-
-		<section class="command" id="set-title">
-			<h1>The <code>set_title</code> function</h1>
-
-			<p class="disp"><code>set_title(<var>$title</var>);</code></p>
-
-			<p>The <code>set_title</code> function sets the page title
-			which will be substituted in the generated HTML output in
-			the <code>title</code> tag. If the template already has the
-			<code>title</code> tag with a title in it, the title will
-			be replaced.</p>
-		</section>
-
-		<section class="command" id="get-title">
-			<h1>The <code>get_title</code> function</h1>
-
-			<p class="disp"><code><var>$title</var> = get_title();</code></p>
-
-			<p>The <code>get_title</code> function returns the page
-			title that was set using the <code>set_title</code>
-			function or <code>null</code> if the title wasn't set.</p>
-		</section>
-
-		<section class="command">
-			<h1>The <code>declare_action</code> function</h1>
-
-			<p class="disp"><code>declare_action(<var>$name</var>, <var>$users</var>, <var>$func</var>)</code></p>
-
-			<p>The <code>declare_action</code> function declares an action <var>name</var> and assigns <var>func</var> is the action function and <var>users</var> as the list of types of uses who can call that action.</p>
-
-			<p>The <var>users</var> variable should contain a comma-separated list of user types. If <code>all</code> is given, all user types will have access to the action.</p>
+			<p>The <code>poparg</code> function returns next part of
+			the parsed URL and shifts the base pointer one step
+			further. If there are no more parts, <code>poparg</code>
+			returns <code>null</code>.</p>
 		</section>
 
 		<section class="command">
@@ -306,9 +262,13 @@ functions when processing the requests.</p>
 
 			<p class="disp"><code>load_ext(<var>$name</var>, ...)</code></p>
 
-			<p>The <code>load_ext</code> function is similar to the <code>lib</code> function except the libraries are loaded from the extensions directory of the H<sub>2</sub> distribution.</p>
+			<p>The <code>load_ext</code> function is similar to the
+			<code>lib</code> function except the libraries are loaded
+			from the extensions directory of the H<sub>2</sub>
+			distribution.</p>
 
-			<p>The extensions are different from libraries in that they interact with H<sub>2</sub> API.</p>
+			<p>The extensions are different from libraries in that they
+			interact with H<sub>2</sub> API.</p>
 		</section>
 
 		<section class="command" id="error">
@@ -349,6 +309,191 @@ functions when processing the requests.</p>
 		</section>
 	</section>
 
+	<section id="pages">
+		<h1>Page functions</h1>
+
+		<section class="command" id="set-title">
+			<h1>The <code>set_title</code> function</h1>
+
+			<p class="disp"><code>set_title(<var>$title</var>);</code></p>
+
+			<p>The <code>set_title</code> function sets the page title
+			which will be substituted in the generated HTML output in
+			the <code>title</code> tag. If the template already has the
+			<code>title</code> tag with a title in it, the title will
+			be replaced.</p>
+		</section>
+
+		<section class="command" id="get-title">
+			<h1>The <code>get_title</code> function</h1>
+
+			<p class="disp"><code><var>$title</var> = get_title();</code></p>
+
+			<p>The <code>get_title</code> function returns the page
+			title that was set using the <code>set_title</code>
+			function or <code>null</code> if the title wasn't set.</p>
+		</section>
+
+		<section class="command" id="set_page_meta">
+			<h1>The <code>set_page_meta</code> function</h1>
+
+			<p class="disp"><code>set_page_meta(<var>$name</var>, <var>$content</var>);</code></p>
+
+			<p>The <code>set_page_meta</code> function adds a
+			<code>meta</code> tag with given name and content
+			attributes to the <code>head</code> section of the
+			generated HTML page.</p>
+		</section>
+
+		<section class="command" id="add_link">
+			<h1>The <code>add_link</code> function</h1>
+
+			<p class="disp"><code>add_link(<var>$rel</var>, <var>$href</var>)</code></p>
+
+			<p>The <code>add_link</code> function adds a
+			<code>&lt;link&gt;</code> element to the head section of
+			the page, with <code>rel</code> and <code>href</code>
+			attributes set to the given values.</p>
+		</section>
+
+		<section class="command" id="add_js_css">
+			<h1>The <code>add_js</code> and <code>add_css</code> functions</h1>
+
+			<p class="disp"><code>add_js(<var>$path</var>, ...)</code></p>
+			<p class="disp"><code>add_css(<var>$path</var>, ...)</code></p>
+
+			<p>The <code>add_js</code> function adds references to
+			JavaScript files as <code>script</code> tags with
+			<code>src</code> attribute set to the URLs inferred from
+			the given paths. The <code>script</code> tags are added at
+			the end of the <code>body</code> section.</p>
+
+			<p>The <code>add_css</code> function adds references to the
+			given stylesheets as <code>link</code> tags in the
+			<code>head</code> section of the generated page.</p>
+
+			<p>The given paths must be relative to the site root. Paths
+			may have query strings
+			(<code>?name=val&amp;...</code>).</p>
+
+			<p>The functions may be called at any time during the
+			script execution as the page formatting and output happens
+			at the end of the script.</p>
+		</section>
+
+		<section class="command" id="url_t">
+			<h1>The <code>url_t</code> and <code>url</code> functions</h1>
+
+			<p class="disp"><code><var>$url</var> = url_t(<var>$path</var>='');</code></p>
+
+			<p class="disp"><code><var>$url</var> = url(<var>$path</var>='');</code></p>
+
+			<p>The <code>url_t</code> function returns page URL which is a concatenation of current base URL with the given path.</p>
+
+			<p>For example, if current URL is
+			<code>example.net/one/two</code> and the page script is
+			<code>pages/foo/bar.php</code>, then
+			<code>url('zwei/drei')</code> will return
+			<code>example.net/one/zwei/drei</code>.</p>
+		</section>
+
+		<section class="command" id="template">
+			<h1>The <code>template</code> function</h1>
+
+			<p class="disp"><code><var>$str</var> = template(<var>$name</var>, <var>$vars</var>=array());</code></p>
+
+			<p>The <code>template</code> function returns the result of
+			parsing the file <code><var>$name</var>.t</code> in the
+			directory of the current page script as PHP file with
+			variables <var>vars</var> in context.</p>
+		</section>
+	</section>
+
+	<section id="actions">
+		<h1>Action functions</h1>
+
+		<section class="command" id="declare_action">
+			<h1>The <code>declare_action</code> function</h1>
+
+			<p class="disp"><code>declare_action(<var>$name</var>,
+			<var>$users</var>, <var>$func</var>)</code></p>
+
+			<p>The <code>declare_action</code> function declares an
+			action <var>name</var> and assigns <var>func</var> is the
+			action function and <var>users</var> as the list of types
+			of uses who can call that action.</p>
+
+			<p>The <var>users</var> variable should contain a
+			comma-separated list of user types. If <code>all</code> is
+			given, all user types will have access to the action.</p>
+		</section>
+
+		<section class="command" id="last_action">
+			<h1>The <code>last_action</code> function</h1>
+
+			<p class="disp"><code><var>$name</var> = last_action();</code></p>
+
+			<p>The <code>last_action</code> function returns name of
+			the preceding action after which the user was redirected to
+			the current page. The function returns <code>null</code> if
+			there was no preceding action.</p>
+		</section>
+
+		<section class="command" id="action_result">
+			<h1>The <code>action_result</code> function</h1>
+
+			<p class="disp"><code><var>$ok</var> = action_result();</code></p>
+
+			<p>The <code>action_result</code> function returns <code>true</code> if the preceding action was successful, <code>false</code> if it returned one or more errors, and <code>null</code> if there was no action.</p>
+		</section>
+
+		<section class="command" id="action_errors">
+			<h1>The <code>action_errors</code> function</h1>
+
+			<p class="disp"><code><var>$errors</var> = action_errors();</code></p>
+
+			<p>The <code>action_errors</code> function returns an array of errors returned by the preceding action. If there was no action, an empty array is returned.</p>
+		</section>
+
+		<section class="command" id="aurl">
+			<h1>The <code>aurl</code> and <code>aurl_t</code> functions</h1>
+
+			<p class="disp"><code><var>$url</var> = aurl_t(<var>$name</var>,
+				<var>$ok_url</var>=null, <var>$fail_url</var>=null);</code></p>
+
+			<p class="disp"><code><var>$url</var> = aurl(<var>$name</var>,
+				<var>$ok_url</var>=null, <var>$fail_url</var>=null);</code></p>
+
+			<p>The <code>aurl_t</code> function returns the URL of the
+			action <var>name</var> which will redirect back to URL
+			<var>ok_url</var> on success or to URL <var>fail_url</var>
+			on error. If <var>ok_url</var> or <var>fail_url</var> are
+			null, the URL of the current page is assumed.</p>
+
+			<p>The <code>aurl</code> function is the same as
+			<code>aurl_t</code> except the returned URL is escaped to
+			be used in HTML output.</p>
+		</section>
+
+		<section class="command" id="action_button">
+			<h1>The <code>action_button</code> function</h1>
+
+			<p class="disp"><code><var>$htm</var>
+				= action_button(<var>$title</var>,
+				<var>$action_name</var>,
+				<var>$args</var>,
+				<var>$ok_url</var>=null,
+				<var>$fail_url</var>=null);</code></p>
+
+			<p>The <code>action_button</code> function returns HTML
+			code for a form with submit button that directs the user to
+			the action URL <code>url_t(<var>$action_name</var>,
+			<var>$ok_url</var>, <var>$fail_url</var>)</code> passing
+			values given in the associative array <var>$args</var> as
+			POST parameters.</p>
+		</section>
+
+	</section>
 
 	<section>
 		<h1>HTTP header functions</h1>
@@ -366,19 +511,36 @@ functions when processing the requests.</p>
 
 			<p class="disp"><code>http_status(<var>$code</var>)</code></p>
 
-			<p>The <code>http_status</code> function adds to the output an HTTP status header corresponding to the given HTTP status code.</p>
+			<p>The <code>http_status</code> function adds to the output
+			an HTTP status header corresponding to the given HTTP
+			status code.</p>
 
-			<p>This function is intended for extensions, like the images subserver, that need more control over the headers.</p>
+			<p>This function is intended for extensions, like the
+			images subserver, that need more control over the
+			headers.</p>
 		</section>
 
 		<section class="command" id="redirect">
 			<h1>The <code>redirect</code> function</h1>
 
-			<p class="disp"><code>redirect(<var>$url</var>, <var>$code</var>=302);</code></p>
+			<p class="disp"><code>redirect(<var>$url</var>,
+				<var>$code</var>=302);</code></p>
 
-			<p>The <code>redirect</code> function writes appropriate HTTP headers to the output to redirect the browser to the given URL and stops the script execution.</p>
+			<p>The <code>redirect</code> function writes appropriate
+			HTTP headers to the output to redirect the browser to the
+			given URL and stops the script execution.</p>
 
-			<p>By default the redirect is accompanied by the <code>302 Found</code> HTTP status header. The <var>code</var> variable may specify another code, like <code>303</code> for the <code>See Other</code> status.</p>
+			<p>By default the redirect is done with the <code>302
+			Found</code> HTTP status. The <var>code</var> variable may
+			specify another code, like <code>303</code> for <code>See
+			Other</code> or <code>307</code> for <code>Temporary
+			Redirect</code> status.</p>
+
+			<p>Note that the <code>302</code> status code is
+			practically ambiguous due to historically incorrect
+			implementation by many browsers. The <code>303</code> and
+			<code>307</code> codes should be used when specific
+			behaviour is needed.</p>
 		</section>
 
 		<section class="command">
@@ -560,11 +722,11 @@ functions when processing the requests.</p>
 			<p>The <code>id</code> function returns the identifier of the user's current identity.</p>
 		</section>
 
-		<section class="command">
+		<section class="command" id="user-set">
 			<h1>The <code>user::set</code> function</h1>
 		</section>
 
-		<section class="command">
+		<section class="command" id="user-get">
 			<h1>The <code>user::get</code> function</h1>
 		</section>
 	</section>
