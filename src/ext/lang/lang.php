@@ -27,11 +27,23 @@ class lang
 	 * When the extension is included, set the default language from
 	 * the settings.
 	 */
-	static function init() {
-		self::$lang = setting( 'lang' );
+	static function init()
+	{
+		$lang = setting( 'lang' );
+		if( !$lang ) return;
+		if( !self::valid( $lang ) ) {
+			error( "Invalid language id in settings: '$lang'" );
+			return;
+		}
+		self::$lang = $lang;
 	}
 
-	static function set_default_language( $lang ) {
+	static function set_default_language( $lang )
+	{
+		if( !self::valid( $lang ) ) {
+			error( "Invalid language id: '$lang'" );
+			return;
+		}
 		self::$lang = $lang;
 	}
 
@@ -41,7 +53,13 @@ class lang
 
 	static function get_message( $msgid, $lang = null )
 	{
-		if( !$lang ) $lang = self::$lang;
+		if( $lang && !self::valid( $lang ) ) {
+			error( "Invalid language id: '$lang'" );
+			return;
+		}
+		if( !$lang ) {
+			$lang = self::$lang;
+		}
 		if( !$lang ) {
 			return $msgid;
 		}
@@ -59,16 +77,6 @@ class lang
 
 	private static function load_dict( $lang )
 	{
-		/*
-		 * Someone could pass $lang='../{...}../etc/whatever', so we
-		 * ensure that $lang can have only letters and '_'.
-		 */
-		if( preg_match( '/[^a-z_]/', $lang ) ) {
-			warning( "Invalid language requested: '$lang'." );
-			self::$dicts[$lang] = array();
-			return;
-		}
-
 		$path = self::path( $lang );
 		if( file_exists( $path ) ) {
 			$dict = self::parse( $path );
@@ -77,6 +85,20 @@ class lang
 			$dict = array();
 		}
 		self::$dicts[$lang] = $dict;
+	}
+
+	/*
+	 * Returns true if the given language identifier is valid.
+	 */
+	private static function valid( $lang )
+	{
+		/*
+		 * The form of HTTP 'accept-language' token:
+		 * 1*8ALPHA *( "-" 1*8ALPHA)
+		 * Valid examples are "havaho-funky-dialect" and "en-US".
+		 */
+		$alpha8 = '[a-zA-Z]{1,8}';
+		return preg_match( "/$alpha8(-$alpha8)*/", $lang );
 	}
 
 	/*
