@@ -30,6 +30,19 @@ class lang
 		self::$lang = $lang;
 	}
 
+	/*
+	 * Returns true if there is a file for the given language.
+	 */
+	static function have( $lang )
+	{
+		if( !self::valid( $lang ) ) {
+			error( "Invalid language id: '$lang'" );
+			return false;
+		}
+		$path = self::path( $lang );
+		return file_exists( $path );
+	}
+
 	static function set( $lang )
 	{
 		if( !self::valid( $lang ) ) {
