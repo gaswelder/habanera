@@ -294,9 +294,14 @@ functions when processing the requests.</p>
 
 			<p class="disp"><code>error(<var>$message<var>);</code></p>
 
-			<p>The <code>error</code> function is equivalent to the PHP <code>trigger_error</code> function with the level set to <code>E_USER_ERROR</code>.</p>
+			<p>The <code>error</code> function is equivalent to the PHP
+			<code>trigger_error</code> function with the level set to
+			<code>E_USER_ERROR</code>.</p>
 
-			<p>All generated errors are treated as fatal (unless there is a custom errors handler that circumvents this). The <code>error</code> function thus assumes script termination with the "Internal Server" error.</p>
+			<p>All generated errors are treated as fatal (unless there
+			is a custom errors handler that circumvents this). The
+			<code>error</code> function thus assumes script termination
+			with the "Internal Server" error.</p>
 		</section>
 
 		<section class="command" id="warning">
@@ -620,6 +625,91 @@ functions when processing the requests.</p>
 			<p>Regardless of the path the script must have write permissions for that directory. If the directory doesn't exist, the script must be able to create it.</p>
 		</section>
 
+	</section>
+
+	<section id="ext-lang">
+		<h1>The <code>lang</code> extension</h1>
+
+		<p>The <code>lang</code> extension is a simpler alternative to
+		<code>gettext</code>. It may be chosen for smaller sites where
+		setting up <code>gettext</code> wouldn't give much advantage or
+		on hostings where <code>gettext</code> isn't available or
+		doesn't work properly.</p>
+
+		<section id="lang-name-format">
+			<h1>Language identifier format</h1>
+
+			<p>The functions that accept a <var>lang</var> argument
+			expect it to be in the HTTP <code>accept-language</code>
+			format, which is:</p>
+
+			<p class="disp"><code>1*8ALPHA *( "-" 1*8ALPHA)</code></p>
+
+			<p>Examples are <code>en</code>, <code>en-GB</code>,
+			<code>my-funky-dialect</code>.</p>
+		</section>
+
+		<section id="lang-file-format">
+			<h1>Translation files</h1>
+
+			<p>Translation file for language <var>lang</var> is
+			<code><var>appdir</var>/lang/&lt;lowecase(<var>lang)&gt;</code>.
+			That is, translation file for language <code>en-GB</code>
+			would be <code><var>appdir</var>/lang/en-gb</code>.</p>
+
+			<p>The file format is plain text with a repeated sequence
+			of lines: (message line, translation line, empty line). An example would be:</p>
+
+<pre class="disp">Hello, world!
+Howdy, globe!
+
+How are ya?
+Wassup?
+</pre>
+		</section>
+
+		<section class="command" id="lang-lookup">
+			<h1>The <code>t</code> and <code>lang::lookup</code> functions</h1>
+
+			<p class="disp"><code><var>$trans</var> =
+				t(<var>$msg</var>, <var>$lang</var>=null);</code></p>
+			<p class="disp"><code><var>$trans</var> =
+				lang::lookup(<var>$msg</var>, <var>$lang</var>=null);</code></p>
+
+			<p><code>t</code> is an alias of <code>lang::lookup</code>.
+			The function returns the translation for <var>msg</var> or
+			<var>msg</var> itself if there is no translation. The
+			translation file for the corresponding language is loaded
+			on demand. If <var>lang</var> is omitted, the default
+			language is assumed.</p>
+		</section>
+
+		<section class="command" id="lang-set">
+			<h1>The <code>lang::set</code> function</h1>
+
+			<p class="disp"><code>lang::set(<var>$lang</var>);</code></p>
+
+			<p>The <code>set</code> function sets default language for
+			lookups to <var>lang</var>.</p>
+		</section>
+
+		<section class="command" id="lang-get">
+			<h1>The <code>lang::get</code> function</h1>
+
+			<p class="disp"><code><var>$lang</var> = lang::get();</code></p>
+
+			<p>The <code>get</code> function returns the default
+			language name used for lookups.</p>
+		</section>
+
+		<section class="command" id="param-lang">
+			<h1>The <code>lang</code> setting</h1>
+
+			<p>The <code>lang</code> parameter may be defined in
+			settings files to set the default language as alternative
+			to calling <code>lang::set</code> in the
+			<code>init.php</code> file.</p>
+		</section>
 	</section>
 </section>
 

@@ -34,8 +34,8 @@ p + p {
 	margin: 1em 0;
 }
 
-code {
-	font-size: 10pt;
+code, pre {
+	font-size: 11pt;
 }
 
 table {
