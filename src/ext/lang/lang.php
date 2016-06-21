@@ -53,9 +53,8 @@ class lang
 		if( array_key_exists( $msgid, self::$dicts[$lang] ) ) {
 			return self::$dicts[$lang][$msgid];
 		}
-		else {
-			return $msgid;
-		}
+
+		return $msgid;
 	}
 
 	private static function load_dict( $lang )
@@ -70,29 +69,48 @@ class lang
 			return;
 		}
 
-		$dict = array();
-		$path = APP_DIR . 'lang/' . $lang;
-		if( file_exists( $path ) )
-		{
-			$lines = array_map( 'trim', file( $path ) );
-			$n = count( $lines );
-
-			$i = 0;
-			while( $i < $n - 1 )
-			{
-				$msgid = $lines[$i++];
-				$text = $lines[$i++];
-				$dict[$msgid] = $text;
-
-				if( $i >= $n ) break;
-
-				if( $lines[$i++] ) {
-					warning( "Empty line expected at file $path, line ".($i+1) );
-					break;
-				}
-			}
+		$path = self::path( $lang );
+		if( file_exists( $path ) ) {
+			$dict = self::parse( $path );
+		}
+		else {
+			$dict = array();
 		}
 		self::$dicts[$lang] = $dict;
+	}
+
+	/*
+	 * Parses the language file with the given path and returns the
+	 * dictionary.
+	 */
+	private static function parse( $path )
+	{
+		$dict = array();
+		$lines = array_map( 'trim', file( $path ) );
+		$n = count( $lines );
+
+		$i = 0;
+		while( $i < $n - 1 )
+		{
+			$msgid = $lines[$i++];
+			$text = $lines[$i++];
+			$dict[$msgid] = $text;
+
+			if( $i >= $n ) break;
+
+			if( $lines[$i++] ) {
+				warning( "Empty line expected at file $path, line ".($i+1) );
+				break;
+			}
+		}
+		return $dict;
+	}
+
+	/*
+	 * Returns path for the given language file.
+	 */
+	private static function path( $lang ) {
+		$path = APP_DIR . 'lang/' . strtolower( $lang );
 	}
 }
 
