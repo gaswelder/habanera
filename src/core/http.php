@@ -44,7 +44,13 @@ function announce_html( $charset = 'UTF-8' ) {
 
 function announce_file( $filename, $size = null )
 {
-	$ext = ext( $filename );
+	$pos = strrpos( $filename, '.' );
+	if( $pos === false ) {
+		$ext = '';
+	} else {
+		$ext = substr( $filename, $pos );
+	}
+
 	$type = _mime::type( $ext );
 	if( !$type ) {
 		warning( "Unknown MIME type for '$filename'" );
