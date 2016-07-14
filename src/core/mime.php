@@ -4,8 +4,7 @@ class _mime
 {
 	private static $types = array(
 		'.xls' => 'application/vnd.ms-excel',
-		'.xlsx' => 'application/vnd.openxmlformats-officedocument'.
-			'.spreadsheetml.sheet',
+		'.xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 		'.zip' => 'application/zip',
 		'.sh' => 'application/x-shellscript',
 		'.png' => 'image/png',
