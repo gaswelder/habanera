@@ -50,12 +50,16 @@ class user
 	 */
 	static function auth( $type, $id = null )
 	{
-		if( !self::type_valid( $type ) ) {
-			trigger_error( "Invalid type name" );
-			return;
-		}
 		self::sclean();
 		self::sset( 'type', $type );
+		if( $type === null ) {
+			return;
+		}
+
+		if( !self::type_valid( $type ) ) {
+			trigger_error( "Invalid type name: $type" );
+			return;
+		}
 		self::sset( 'id', $id );
 	}
 
@@ -137,7 +141,7 @@ class user
 		$pref = self::prefix( '' );
 		foreach( $s as $k => $v )
 		{
-			if( strpos( $pref, $k ) === 0 ) {
+			if( strpos( $k, $pref ) === 0 ) {
 				unset( $s[$k] );
 			}
 		}
