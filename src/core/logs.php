@@ -23,17 +23,19 @@ class h2_logs
 
 	static function log( $msg, $logname = 'log' )
 	{
-		$id = user::get_id();
-		$type = user::get_type();
-		if( !$type ) {
-			$type = 'nobody';
-		}
+		$uid = user::type();
+		if( !$uid ) $uid = 'nobody';
+
+		$id = user::id();
+		if( $id ) $uid .= "#$id";
+
+		$uid .= '@' . $_SERVER['REMOTE_ADDR'];
 
 		$cols = array(
 			date( 'd.m.Y H:i:s' ),
+			$uid,
 			$msg,
-			"($type#$id)",
-			$_SERVER['REMOTE_ADDR'],
+			current_url(),
 			req_header( 'User-Agent' )
 		);
 		$out = implode( "\t", $cols ) . PHP_EOL;
