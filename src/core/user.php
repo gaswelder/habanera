@@ -10,68 +10,59 @@ class user
 	 * key KEY_PREFIX/$type/key.
 	 */
 	const KEY_PREFIX = '_userdata_';
-	private static $type = 'guest';
 
-	/*
-	 * Returns actual session data key for the given user key.
-	 */
-	private static function prefix( $key ) {
-		return self::KEY_PREFIX . '/' . self::$type . '/' . $key;
-	}
+	private static $type = null;
 
 	/*
 	 * Switches to another user type. If the user was not authenticated
-	 * for that type, all data values will be null.
+	 * for that type, all data values will be null and false will be
+	 * returned.
 	 */
 	static function select( $type )
 	{
 		if( !self::type_valid( $type ) ) {
 			trigger_error( "Invalid type name" );
-			return;
+			return false;
 		}
-		self::$type = $type;
+
+		if( self::have_type( $type ) ) {
+			self::$type = $type;
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	/*
-	 * Tells whether the type name is valid.
-	 */
-	private static function type_valid( $type )
-	{
-		/*
-		 * Type names must be non-empty strings without the slash
-		 * character since we use it to build session keys.
-		 */
-		return ( is_string( $type ) && $type != ''
-			&& strpos( $type, '/' ) === false );
-	}
-
-	/*
-	 * Sets the user type and identifier. All previous data is cleaned.
+	 * Adds given credentials pair to the existing set. If a pair with
+	 * the same type exists, it is removed before the new one is added.
 	 */
 	static function auth( $type, $id = null )
 	{
-		self::sclean();
-		self::sset( 'type', $type );
-		if( $type === null ) {
-			return;
-		}
-
 		if( !self::type_valid( $type ) ) {
 			trigger_error( "Invalid type name: $type" );
 			return;
 		}
+
+		if( self::have_type( $type ) ) {
+			self::clear( $type );
+		}
+
+		self::$type = $type;
+		self::sset( 'type', $type );
 		self::sset( 'id', $id );
 	}
 
 	/*
-	 * Returns user type set with the "authorise" function.
+	 * Returns currently selected user type.
 	 */
 	static function type() {
 		return self::sget( 'type' );
 	}
 
 	/*
-	 * Returns user identifier set with the "authorise" function.
+	 * Returns currently selected user identifier.
 	 */
 	static function id() {
 		return self::sget( 'id' );
@@ -91,6 +82,45 @@ class user
 		return self::sget( 'data-'.$key );
 	}
 
+	private static function have_type( $type )
+	{
+		$k = self::key( $type, 'type' );
+		$s = self::s();
+		return isset( $s[$k] );
+	}
+
+	private static function clear( $type )
+	{
+		$prefix = self::key( $type, '' );
+		$s = self::s();
+		$K = array_keys( $s );
+		foreach( $K as $k ) {
+			if( strpos( $k, $prefix ) === 0 ) {
+				unset( $s[$k] );
+			}
+		}
+	}
+
+	/*
+	 * Returns actual session data key for the given user key.
+	 */
+	private static function key( $type, $key ) {
+		return self::KEY_PREFIX . '/' . $type . '/' . $key;
+	}
+
+	/*
+	 * Tells whether the type name is valid.
+	 */
+	private static function type_valid( $type )
+	{
+		/*
+		 * Type names must be non-empty strings without the slash
+		 * character since we use it to build session keys.
+		 */
+		return ( is_string( $type ) && $type != ''
+			&& strpos( $type, '/' ) === false );
+	}
+
 	/*
 	 * Initializes the session if needed.
 	 * Returns a reference to the $_SESSION superglobal.
@@ -108,7 +138,7 @@ class user
 	 */
 	private static function sset( $key, $value )
 	{
-		$key = self::prefix( $key );
+		$key = self::key( self::$type, $key );
 		$s = &self::s();
 		if( $value === null ) {
 			unset( $s[$key] );
@@ -123,27 +153,12 @@ class user
 	 */
 	private static function sget( $key, $default = null )
 	{
-		$key = self::prefix( $key );
+		$key = self::key( self::$type, $key );
 		$s = &self::s();
 		if( !isset( $s[$key] ) ){
 			return $default;
 		} else {
 			return $s[$key];
-		}
-	}
-
-	/*
-	 * Unsets all data that has been set by this module.
-	 */
-	private static function sclean()
-	{
-		$s = &self::s();
-		$pref = self::prefix( '' );
-		foreach( $s as $k => $v )
-		{
-			if( strpos( $k, $pref ) === 0 ) {
-				unset( $s[$k] );
-			}
 		}
 	}
 }

@@ -212,8 +212,7 @@ class actions
 		 * credentials.
 		 */
 		foreach( $list as $type ) {
-			user::select( $type );
-			if( user::type() == $type ) {
+			if( user::select( $type ) ) {
 				return true;
 			}
 		}
