@@ -42,7 +42,7 @@ class user
 		 * character since we use it to build session keys.
 		 */
 		return ( is_string( $type ) && $type != ''
-			&& strpos( $name, '/' ) === false );
+			&& strpos( $type, '/' ) === false );
 	}
 
 	/*
