@@ -152,7 +152,11 @@ class actions
 		 * Run the action and receive errors, if any.
 		 */
 		$errors = self::run_action( $action_name );
-		self::log( $action_name, $errors );
+
+		if( setting( 'log_actions' ) ) {
+			self::log( $action_name, $errors );
+		}
+
 		if( !empty( $errors ) ) {
 			warning( "Action '$action_name' errors: " . implode( '; ', $errors ) );
 		}
@@ -325,10 +329,6 @@ class actions
 	 */
 	private static function log( $action_name, $errors )
 	{
-		if( !setting( 'log_actions' ) ) {
-			return;
-		}
-
 		$url = current_url();
 		if( empty( $errors ) ) {
 			$status = 'OK';
@@ -337,7 +337,7 @@ class actions
 			$status = count( $errors ) . ' errors';
 		}
 
-		log_message( "$action_name	$status	$url", 'actions' );
+		log_message( "$action_name	$status", 'actions' );
 	}
 }
 ?>
