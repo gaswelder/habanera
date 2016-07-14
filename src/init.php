@@ -7,7 +7,6 @@ require _PATH.'core/output.php';
 require _PATH.'core/errors.php';
 require _PATH.'core/libs.php';
 require _PATH.'core/files.php';
-require _PATH.'core/functions.php';
 require _PATH.'core/logs.php';
 require _PATH.'core/req_url.php';
 require _PATH.'core/settings.php';
