@@ -69,6 +69,13 @@ function aurl_t( $name, $redirect_ok = null, $redirect_fail = null )
 		$redirect_fail = $redirect_ok;
 	}
 
+	$vars = array( 'rs', 'rf', 'ares', 'aname' );
+	$redirect_ok = _url_clean( $redirect_ok, $vars );
+	$redirect_fail = _url_clean( $redirect_fail, $vars );
+
+	$redirect_ok = str_replace( h2::domain(), '', $redirect_ok );
+	$redirect_fail = str_replace( h2::domain(), '', $redirect_fail );
+
 	return h2::base() . '/a/'.$name.'?rs='.urlencode($redirect_ok)
 		.'&rf='.urlencode($redirect_fail);
 }
@@ -76,6 +83,41 @@ function aurl_t( $name, $redirect_ok = null, $redirect_fail = null )
 function aurl( $args, $redirect_ok = null, $redirect_fail = null )
 {
 	return htmlspecialchars( aurl_t( $args, $redirect_ok, $redirect_fail ) );
+}
+
+/*
+ * Removes given query variables from the url and returns the result.
+ */
+function _url_clean( $url, $vars )
+{
+	/*
+	 * Parse the URL. If there is no query string, don't bother
+	 * and return the original URL.
+	 */
+	$u = parse_url( $url );
+	if( !isset( $u['query'] ) ) return $url;
+
+	/*
+	 * Remove the variables.
+	 */
+	parse_str( $u['query'], $q );
+	foreach( $vars as $v ) {
+		unset( $q[$v] );
+	}
+
+	/*
+	 * Compose the URL back.
+	 */
+	$url = '';
+	if( isset( $u['scheme'] ) ) $url .= $u['scheme'] . '://';
+	$url .= $u['host'];
+	if( isset( $u['port'] ) ) $url .= ':'.$u['port'];
+	$url .= $u['path'];
+	if( !empty( $q ) ) {
+		$url .= '?' . http_build_query( $q, '', '&' );
+	}
+	if( isset( $u['fragment'] ) ) $url .= '#'.$u['fragment'];
+	return $url;
 }
 
 function action_button( $button_title, $action_name, $args,
