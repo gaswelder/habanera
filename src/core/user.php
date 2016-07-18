@@ -89,10 +89,14 @@ class user
 		return isset( $s[$k] );
 	}
 
-	private static function clear( $type )
+	/*
+	 * Removes the credentials pair with the given type, and all
+	 * associated data.
+	 */
+	static function clear( $type )
 	{
 		$prefix = self::key( $type, '' );
-		$s = self::s();
+		$s = &self::s();
 		$K = array_keys( $s );
 		foreach( $K as $k ) {
 			if( strpos( $k, $prefix ) === 0 ) {
