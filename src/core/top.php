@@ -15,7 +15,7 @@ function add_subserver( $func ) {
 	h2::add_subserver( $func );
 }
 
-function argv($i) {
+function arg($i) {
 	return h2::argv($i);
 }
 
