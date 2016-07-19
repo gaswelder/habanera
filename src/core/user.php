@@ -11,7 +11,7 @@ class user
 	 */
 	const KEY_PREFIX = '_userdata_';
 
-	private static $type = null;
+	private static $type = 'guest';
 
 	/*
 	 * Switches to another user type. If the user was not authenticated
@@ -58,7 +58,7 @@ class user
 	 * Returns currently selected user type.
 	 */
 	static function type() {
-		return self::sget( 'type' );
+		return self::$type;
 	}
 
 	/*
@@ -84,6 +84,7 @@ class user
 
 	private static function have_type( $type )
 	{
+		if( $type == 'guest' ) return true;
 		$k = self::key( $type, 'type' );
 		$s = self::s();
 		return isset( $s[$k] );
@@ -103,6 +104,7 @@ class user
 				unset( $s[$k] );
 			}
 		}
+		self::$type = 'guest';
 	}
 
 	/*

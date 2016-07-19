@@ -241,24 +241,11 @@ class actions
 	private static function action_allowed( $action_name )
 	{
 		$list = self::$users[$action_name];
-
-		/*
-		 * If 'all' is mentioned in the list, can run it for everyone.
-		 */
-		if( in_array( 'all', $list ) ) {
-			return true;
-		}
-
-		/*
-		 * Try to find one of the declared types in the user's
-		 * credentials.
-		 */
 		foreach( $list as $type ) {
 			if( user::select( $type ) ) {
 				return true;
 			}
 		}
-
 		return false;
 	}
 
