@@ -55,6 +55,43 @@ class user
 	}
 
 	/*
+	 * Transfers all data from the guest to another identity.
+	 */
+	static function transfer( $type )
+	{
+		if( !self::have_type( $type ) ) {
+			trigger_error( "Can't transfer data, no type '$type'" );
+			return;
+		}
+
+		$s = &self::s();
+
+		/*
+		 * Get all data assigned to the guest identity.
+		 */
+		$data = array();
+		$pref = self::key( 'guest', '' );
+		foreach( $s as $k => $v ) {
+			if( strpos( $k, $pref ) !== 0 ) continue;
+			$name = substr( $k, strlen( $pref ) );
+			$data[$name] = $v;
+		}
+
+		/*
+		 * Add that data to the new identity.
+		 */
+		$pref = self::key( $type, '' );
+		foreach( $data as $k => $v ) {
+			$s[$pref . $k] = $v;
+		}
+
+		/*
+		 * Clear the guest data.
+		 */
+		self::clear( 'guest' );
+	}
+
+	/*
 	 * Returns currently selected user type.
 	 */
 	static function type() {
