@@ -64,6 +64,10 @@ class h2
 		return self::$url;
 	}
 
+	static function domain() {
+		return self::$domain;
+	}
+
 	static function base() {
 		return self::$domain . '/' . self::$base;
 	}
