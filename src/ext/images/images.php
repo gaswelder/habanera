@@ -198,7 +198,7 @@ class images
 			$path = substr( $path, 0, -strlen( $ext ) ) . $marker . $ext;
 		}
 
-		return h2::prefix() . $path;
+		return h2::base() . '/' . $path;
 	}
 
 	/*
