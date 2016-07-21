@@ -17,7 +17,7 @@ require _PATH.'core/vars.php';
 require _PATH.'core/pages.php';
 require _PATH.'core/actions.php';
 
-function h2main( $appdir = 'appfiles', $base = '/' ) {
+function hmain( $appdir = 'appfiles', $base = '/' ) {
 	h2::main( $appdir, $base );
 }
 ?>
