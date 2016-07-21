@@ -2,12 +2,13 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>H₂</title>
+<title>Habanera</title>
 <link rel="stylesheet" href="doc.css">
 </head>
 <body>
 
-<h1>H<sub>2</sub></h1>
+
+<h1>Habanera</h1>
 
 <section id="setup">
 	<h1>Setup</h1>
@@ -16,22 +17,22 @@
 	that uses the framework.</p>
 
 	<section id="framework">
-		<h1>The framework</h1>
+		<h1>Framework files</h1>
 
 		<p>The framework itself comes as a folder that has to be copied
 		somewhere with read-only permissions. It is up to the
-		administrator to decide where to put the files. Let's assume
-		that the files have been copied into the
-		<code>/usr/lib/h2</code> directory.</p>
+		administrator to decide where to put the files. For example,
+		the files might be put into the <code>/usr/lib/habanera</code>
+		directory.</p>
 	</section>
 
 	<section id="appdir">
-		<h1>Application directory</h1>
+		<h1>Application files</h1>
 
 		<p>The application directory contains all definitions and
 		scripts for the site. Let's assume that the application is
 		named "app" and will be put in the directory
-		<code>/home/webapps/app</code>.
+		<code>/home/webapps/app</code>.</p>
 	</section>
 
 	<section id="permissions">
@@ -41,16 +42,17 @@
 		application files, so the entire directory may be owned by a
 		different user (probably the one maintaining the site).</p>
 
-		<p>The only exception is the "writable directory" which by
-		default is assumed to be the <code>tmp</code> directory inside
-		the application directory. The web server's user needs to have
-		full permissions for that directory, so the administrator will
-		have to create and explicitly grant permissions for that single
-		directory. The administrator can also redefine the write
-		directory to be somewhere else, like
-		<code>/var/webapps/app</code>, but that directory shouldn't be
-		in the <code>/tmp</code> directory as the data that is written
-		by the application can't always be thrown away.</p>
+		<p>The only exception is the "writable directory" to which the
+		webserver will need to have full permissions. By default it is
+		the <code>tmp</code> directory inside the application
+		directory; in our example that would be
+		<code>/home/webapps/app/tmp</code>. The administrator will have
+		to create and explicitly grant permissions for it. The
+		administrator can also redefine the write directory to be
+		somewhere else, like <code>/home/webapps/app-data</code>, but
+		that directory shouldn't be in the <code>/tmp</code> directory
+		as the data that is written by the application can't always be
+		thrown away.</p>
 	</section>
 
 	<section id="web-content">
@@ -59,14 +61,14 @@
 		<p>Static content like images, stylesheets and javascripts will
 		be in the web root directory, like with the usual static sites.
 		There are no specific recommendations for that expect the usual
-		ones: assign the files to a different user and give the server
-		read-only permissions.</p>
+		ones: assign the files to a different user than the webserver
+		and give the server only read permissions.</p>
 
 		<p>As with the application directory, there is one exception.
 		If the site allows uploading files into directories in the web
-		tree, then those directories will have to have write
-		permissions for the web server. It depends on the site which
-		those directories are.</p>
+		tree (like weblogs, for example, do), then those directories
+		will have to have write permissions for the web server. It
+		depends on the site which those directories are.</p>
 	</section>
 
 	<section id="entry">
@@ -75,135 +77,163 @@
 		<p>The entry point is the PHP script that will actually be
 		called by the web server for all URLs related to the
 		application. All that script has to do is to include the
-		framework code and call <code>h2main</code> passing the
+		framework code and call <code>hmain</code> passing the
 		application directory path as the first argument. So, in our
 		example that will be:</p>
 
-		<p class="disp"><code>&lt;?php<br>
-		require '/usr/lib/h2/init.php';<br>
-		h2main('/home/webapps/app');<br>
-		?&gt;</code></p>
+<pre>&lt;?php
+require '/usr/lib/habanera/init.php';
+hmain('/home/webapps/app');
+?&gt;</pre>
 
+		<p>Before calling <code>hmain</code> the script may also have
+		to do some other setup operations, for example setting the
+		<code>error_log</code> directive, setting the time zone or
+		dealing with other idiosyncrasies of the hosting.</p>
 
-		<p>Before the <code>h2main</code> call the script may also have
-		some other setup operations, for example setting the
-		<code>error_log</code> directive or dealing with idiosyncrasies
-		of the hosting.</p>
+		<p>The web server has to be configured in such a way as to call
+		the script for all related URLs and serve the output. Typical
+		case, especially on a shared hosting, is the Apache web server
+		and <code>.htaccess</code> file with the following content:</p>
 
-		<p>After that the web server has to be configured in such a way
-		as to call the script for all related URLs. Typical case,
-		especially on a shared hosting, is the Apache web server
-		running PHP scripts and serving their output instead of serving
-		the scripts themselves. In that case we have to use mod_rewrite
-		to make the URLs work. For that, the <code>.htaccess</code>
-		file should contain following:</p>
-
-		<p class="disp"><code>RewriteEngine	On<br>
-		RewriteCond	%{DOCUMENT_ROOT}/%{REQUEST_URI} !-f<br>
-		RewriteCond	%{DOCUMENT_ROOT}/%{REQUEST_URI} !-d<br>
-		RewriteCond	%{REQUEST_URI}	!favicon\.ico
-		RewriteRule	.	index.php</code></p>
-
-		<p>Note that this doesn't necessarily have to be in the
-		<code>.htaccess</code> file, but typically is, due to the lack
-		of access to the server configuration file, or just plain
-		conveniency.</p>
+<pre>RewriteEngine	On
+RewriteCond	%{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
+RewriteCond	%{DOCUMENT_ROOT}/%{REQUEST_URI} !-d
+RewriteCond	%{REQUEST_URI}	!favicon\.ico
+RewriteRule	.	index.php</pre>
 	</section>
 </section>
 
-
 <section id="intro">
-	<h1>Introduction</h1>
+<h1>Introduction</h1>
 
-	<p>This section is for those willing to understand how the
-	framework functions when processing the requests.</p>
+<p>This section is for those willing to understand how the framework
+functions.</p>
 
-	<section id="goal">
-		<h1>Goal</h1>
+<section id="goal">
+<h1>Goal</h1>
 
-		<p>The goal for the framework is to be as unobtrusive as
-		possible. There must not be demands to create special classes
-		or files in order to be able to output a simple string to the
-		browser. Ideally, one should be able to take a standalone PHP
-		script and have it run by the framework without any changes.
-		After that the script could be gradually rewriten using the
-		functions of the framework, splitting other parts into actions
-		or templates, and so on.</p>
+<p>The goal for the framework is to be as unobtrusive as possible.
+There should not be demands to create special classes or files to be
+able to output a simple page to the browser. Ideally, one should be
+able to take a standalone PHP script and have the framework run it
+without minimal changes. After that the script could be gradually
+rewriten using the functions of the framework, splitting other parts
+into actions or templates, and so on.</p>
+</section>
 
-		<p>As a result, a "hello, world" page may be written in one line:</p>
+<section id="concepts">
+<h1>Concepts</h1>
 
-		<p class="disp"><code>&lt;?php echo "Hello, world."; ?&gt;</code></p>
-	</section>
+<p>A typical site deals with two types of requests: requests that
+return a page and requests that result in some action being done on the
+server side, without returning any page. The second kind of requests
+typically ends with a redirect to the relevant "post-action" page, so
+the user sees seamless transition between pages with the action done in
+between.</p>
 
-	<section id="concepts">
-		<h1>Concepts</h1>
+<p>There are sites that don't make the distinction and may, for
+example, process a user-submitted form and generate a page at the same
+time. The user doesn't see the difference except that browsers refuse
+to refresh such a page without sending the form data again. There might
+be cases where such behaviour is desirable, but there are no such cases
+that couldn't be reimplemented with this distinction enforced.</p>
 
-		<p>A typical site deals with two types of requests: the
-		requests that return a page and the requests that result in
-		some action being done on the server side, without returning
-		any page. The second kind of requests typically ends with a
-		redirect to the relevant "post-action" page, so the user sees
-		seamless transition between pages with the action fultilled in
-		between.</p>
+<p>This framework implements this distinction and names the scripts
+that produce pages "pages" and scripts dedicated to some work like
+processing POST requests, "actions".</p>
+</section>
 
-		<p>There are sites that don't make the distinction and may, for
-		example, process a user-submitted form and generate a page at
-		the same time. The user doesn't see the difference except that
-		browsers refuse to refresh such a page without sending the form
-		data again. There might be cases where such behaviour is
-		desirable, but there are no such cases that can't be
-		reimplemented with this distinction in place.</p>
+<section id="subservers">
+<h1>Subservers</h1>
 
-		<p>This framework implements this distinction and names the
-		scripts that produce pages "pages" and scripts dedicated to
-		some work like processing POST requests "actions".</p>
-	</section>
+<p>The framework takes requests from the web server and dispatches them
+to its own "subservers". A "subserver" is a function which takes a
+request object, determines if it can fulfil it, and if it can, fulfils
+is.</p>
 
-	<section id="subservers">
-		<h1>Subservers</h1>
+<p>The script will call all registered subservers in the order of their
+registration until one of them returns <code>true</code> or there are
+no more functions to call.</p>
 
-		<p>The core takes requests from the web server and dispatches
-		them to its own "subservers". A "subserver" is a function which
-		takes a request object, determines if it can fulfil it, and if
-		it can, fulfils is.</p>
+<p>The framework itself defines the "pages" subserver and the "actions"
+subserver.</p>
+</section>
 
-		<p>The script will call all registered subserver functions in
-		the order of their registration until one of them returns
-		<code>true</code> or there are no more functions to call.</p>
+<section id="pages">
+<h1>Pages</h1>
 
-		<p>The core itself defines a "pages" subserver which will be
-		called last and will try to serve a page by from the "pages"
-		directory.</p>
-	</section>
+<p>Pages subserver is the default subserver which serves pages creating
+them from templates stored in the "pages" directory of the application
+directory.</p>
 
-	<section id="pages">
-		<h1>Pages</h1>
+<p>The URL path is mapped to the directories hierarchy inside the pages
+directory. If the requested URL is <code>/foo/bar</code>, then the
+subserver will try to parse files <code>pages/foo/bar.php</code>,
+<code>pages/foo/default.php</code>, <code>pages/foo.php</code>,
+<code>pages/default.php</code> until one of them is found.</p>
 
-		<p>Pages subserver is the default subserver which serves pages
-		creating them from templates. Templates are stored in the "pages"
-		directory of the application directory.</p>
+<p>The trailing part of the URL will then be converted to the
+"arguments" accessible through the <code>arg</code> function. For
+example, if the request <code>/foo/bar/42</code> has resulted in the
+file <code>pages/foo/default.php</code> being processed, then the
+arguments will be <code>"default"</code>, <code>"bar"</code>, and
+<code>"42"</code>.</p>
+</section>
 
-		<p>The URL path is mapped to the directories hierarchy inside the
-		pages directory. If the request is /foo/bar, then the subserver
-		will try to parse files pages/foo/bar.php, pages/foo/default.php,
-		pages/foo.php, pages/default.php until one of them is found.</p>
+<section id="actions">
+<h1>Actions</h1>
 
-		<p>The trailing part of the URL will then be converted to the
-		"arguments" accessible through the argv function. For example, if
-		the request /foo/bar has resulted in the file pages/foo/default.php
-		being called, then the arguments will be "default", "bar".</p>
-	</section>
+
+</section>
+
+<section id="sessions">
+<h1>User sessions</h1>
+
+<p>In many cases a website requires the user to be identified through a
+login form. After that the obtained credentials are stored in the
+session. Two parameters are stored: user type and user identifier.
+Although in general only the identifier would be enough to pull all
+other information from the database, the type is checked so often that
+it is practical to keep it in the session. Thus after the authorisation
+the site will call <code>user::auth</code> function to put user type
+and identifier in the session and then check the cached type on all
+pages that require specific type (like "admin").</p>
+
+<p>Another, less common but still important problem, is assigning
+multiple credentials to one user. Suppose a single site hosts two admin
+interfaces, one for editor and one for reviewer. There are different
+accounts for both roles, and different people are expected to be behind
+different roles, but suppose there is a person who happens to work as
+both. When that person tries to access the editor page, they are asked
+to log in and marked as an 'editor'. If after that the person goes to
+the reviews page and logs in there, they will be now marked as a
+'reviewer' and will lose access to the editor's page.</p>
+
+<p>Therefore one user has to be able to log in with more than one
+different roles and keep the credentials simultaneuosly. Now the
+'editor' page will have then first to declare that an 'editor' is
+expected before checking the keys. Upon receiving that declaration the
+session system will have to see if there are 'editor' credentials and
+switch to them, or switch to null if there are not. The same will go to
+actions. If an action "save_review" is declared for users of type
+'reviewer' and 'big_boss', the actions subserver will try both
+types.</p>
+
+</section>
 
 	<section id="settings">
 		<h1>Settings</h1>
 
 		<p>Some parameters may be defined in INI-files in the
 		application directory. The files are loaded on demand when the
-		<code>setting</code> function is first called. The default file
-		name is <code>settings.ini</code>. Parameters may be added or
-		overridden based on the host name. Thus, if the host name is
-		<code>foo.example.com</code>, then following files will be
-		loaded, if present:</p>
+		<code>setting</code> function is first called.</p>
+
+		<p>The default file name is <code>settings.ini</code>. Other
+		files may be present to add or redefine parameters based on
+		host names. If the host name is <code>foo.example.com</code>,
+		then following files will be also loaded, if present, in the
+		given order:</p>
 
 		<ol>
 			<li><code>settings.ini</code></li>
@@ -211,103 +241,110 @@
 			<li><code>settings.com.example.ini</code></li>
 			<li><code>settings.com.example.foo.ini</code></li>
 		</ol>
-
-		<p>Note that neither of the files must be present, the
-		nonexistent paths will be skipped.</p>
 	</section>
 </section>
 
-<section id="reference">
-	<h1>Reference</h1>
+<section id="reference" class="no-toc">
+<h1>Reference</h1>
 
-	<section>
-		<h1>Core functions</h1>
+<section>
+<h1>Core functions</h1>
 
-		<section class="command" id="current_url">
-			<h1>The <code>current_url</code> function</h1>
+<section class="command" id="current_url">
+	<h1>The <code>current_url</code> function</h1>
 
-			<p class="disp"><code><var>$url</var> = current_url();</code></p>
+	<p class="disp"><code><var>$url</var> = current_url();</code></p>
 
-			<p>The <code>current_url</code> functions returns the URL
-			that is being processed. The URL is returned as plain text,
-			without HTML escaping.</p>
-		</section>
+	<p>The <code>current_url</code> functions returns the URL
+	that is being processed. The URL is returned as plain text,
+	without HTML escaping.</p>
+</section>
 
-		<section class="command" id="poparg">
-			<h1>The <code>poparg</code> function</h1>
+<section class="command" id="poparg">
+	<h1>The <code>poparg</code> function</h1>
 
-			<p class="disp"><code><var>$arg</var> = poparg()</code></p>
+	<p class="disp"><code><var>$arg</var> = poparg()</code></p>
 
-			<p>The <code>poparg</code> function returns next part of
-			the parsed URL and shifts the base pointer one step
-			further. If there are no more parts, <code>poparg</code>
-			returns <code>null</code>.</p>
-		</section>
+	<p>The <code>poparg</code> function returns next part of
+	the parsed URL and shifts the base pointer one step
+	further. If there are no more parts, <code>poparg</code>
+	returns <code>null</code>.</p>
+</section>
 
-		<section class="command">
-			<h1>lib</h1>
+<section class="command">
+<h1>lib</h1>
 
-			<p><code>lib($name)</code></p>
-			<p>The lib function includes the file $name.php in the application's lib directory. This is a way to declaratively include libraries, typically used in application init scripts.</p>
-		</section>
+<p><code>lib($name)</code></p>
 
-		<section class="command">
-			<h1>add_classes_dir</h1>
-			<p><code>add_classes_dir($dir)</code></p>
-			<p>Adds the given directory to the list of directories searched by the classes autoloader.</p>
-		</section>
+<p>The lib function includes the file $name.php in the application's
+lib directory. This is a way to declaratively include libraries,
+typically used in application init scripts.</p>
+</section>
 
-		<section class="command" id="load_ext">
-			<h1>The <code>load_ext</code> function</h1>
+<section class="command">
+<h1>add_classes_dir</h1>
+<p><code>add_classes_dir($dir)</code></p>
+<p>Adds the given directory to the list of directories searched by the
+classes autoloader.</p>
+</section>
 
-			<p class="disp"><code>load_ext(<var>$name</var>, ...)</code></p>
+<section class="command" id="load_ext">
+<h1>The <code>load_ext</code> function</h1>
 
-			<p>The <code>load_ext</code> function is similar to the
-			<code>lib</code> function except the libraries are loaded
-			from the extensions directory of the H<sub>2</sub>
-			distribution.</p>
+<p class="disp"><code>load_ext(<var>$name</var>, ...)</code></p>
 
-			<p>The extensions are different from libraries in that they
-			interact with H<sub>2</sub> API.</p>
-		</section>
+<p>The <code>load_ext</code> function is similar to the
+<code>lib</code> function except the libraries are loaded from the
+extensions directory of the H<sub>2</sub> distribution.</p>
 
-		<section class="command" id="error">
-			<h1>The <code>error</code> function</h1>
+<p>The extensions are different from libraries in that they interact
+with H<sub>2</sub> API.</p>
+</section>
 
-			<p class="disp"><code>error(<var>$message<var>);</code></p>
+<section class="command" id="error">
+<h1>The <code>error</code> function</h1>
 
-			<p>The <code>error</code> function is equivalent to the PHP
-			<code>trigger_error</code> function with the level set to
-			<code>E_USER_ERROR</code>.</p>
+<p class="disp"><code>error(<var>$message<var>);</code></p>
 
-			<p>All generated errors are treated as fatal (unless there
-			is a custom errors handler that circumvents this). The
-			<code>error</code> function thus assumes script termination
-			with the "Internal Server" error.</p>
-		</section>
+<p>The <code>error</code> function is equivalent to the PHP
+<code>trigger_error</code> function with the level set to
+<code>E_USER_ERROR</code>.</p>
 
-		<section class="command" id="warning">
-			<h1>The <code>warning</code> function</h1>
+<p>All generated errors are treated as fatal (unless there is a custom
+errors handler that circumvents this). The <code>error</code> function
+thus assumes script termination with the "Internal Server" error.</p>
+</section>
 
-			<p class="disp"><code>warning(<var>$message</var>);</code></p>
+<section class="command" id="warning">
+<h1>The <code>warning</code> function</h1>
 
-			<p>The <code>warning</code> function is intended to report potential errors, as opposed to the <code>error</code> function which typically assumes that the script shouldn't continue.</p>
+<p class="disp"><code>warning(<var>$message</var>);</code></p>
 
-			<p>If the <code>debug</code> parameter is set to <code>1</code>, the <code>warning</code> function is equivalent to the <code>error</code> function. Otherwise it just prints the message to the error log without triggering any error handlers.</p>
-		</section>
+<p>The <code>warning</code> function is intended to report potential
+errors, as opposed to the <code>error</code> function which typically
+assumes that the script shouldn't continue.</p>
 
-		<section class="command">
-			<h1>log_message</h1>
-		</section>
+<p>If the <code>debug</code> parameter is set to <code>1</code>, the
+<code>warning</code> function is equivalent to the <code>error</code>
+function. Otherwise it just prints the message to the error log without
+triggering any error handlers.</p>
+</section>
 
-		<section class="command" id="setting">
-			<h1>The <code>setting</code> function</h1>
+<section class="command">
+	<h1>log_message</h1>
+</section>
 
-			<p class="disp"><code><var>$val</var> = setting(<var>$name</var>);</code></p>
+<section class="command" id="setting">
+<h1>The <code>setting</code> function</h1>
 
-			<p>The <code>setting</code> function returns the value of the <var>name</var> parameter as defined in the corresponding settings file in the application directory. If the parameter is not defined, <code>null</code> is returned.</p>
-		</section>
-	</section>
+<p class="disp"><code><var>$val</var> = setting(<var>$name</var>);</code></p>
+
+<p>The <code>setting</code> function returns the value of the
+<var>name</var> parameter as defined in the corresponding settings file
+in the application directory. If the parameter is not defined,
+<code>null</code> is returned.</p>
+</section>
+</section>
 
 	<section id="pages">
 		<h1>Page functions</h1>
@@ -410,7 +447,7 @@
 	</section>
 
 	<section id="actions">
-		<h1>Action functions</h1>
+		<h1>Actions</h1>
 
 		<section class="command" id="declare_action">
 			<h1>The <code>declare_action</code> function</h1>
@@ -476,48 +513,56 @@
 		</section>
 
 		<section class="command" id="action_button">
-			<h1>The <code>action_button</code> function</h1>
+		<h1>The <code>action_button</code> function</h1>
 
-			<p class="disp"><code><var>$htm</var>
-				= action_button(<var>$title</var>,
-				<var>$action_name</var>,
-				<var>$args</var>,
-				<var>$ok_url</var>=null,
-				<var>$fail_url</var>=null);</code></p>
+		<p class="disp"><code><var>$htm</var>
+			= action_button(<var>$title</var>,
+			<var>$action_name</var>,
+			<var>$args</var>,
+			<var>$ok_url</var>=null,
+			<var>$fail_url</var>=null);</code></p>
 
-			<p>The <code>action_button</code> function returns HTML
-			code for a form with submit button that directs the user to
-			the action URL <code>url_t(<var>$action_name</var>,
-			<var>$ok_url</var>, <var>$fail_url</var>)</code> passing
-			values given in the associative array <var>$args</var> as
-			POST parameters.</p>
+		<p>The <code>action_button</code> function returns HTML code for a form
+		with submit button that directs the user to the action URL
+		<code>url_t(<var>$action_name</var>, <var>$ok_url</var>,
+		<var>$fail_url</var>)</code> passing values given in the associative
+		array <var>$args</var> as POST parameters.</p>
 		</section>
 
+		<section class="command" id="ini-log_actions">
+		<h1>The <code>log_actions</code> parameter</h1>
+
+		<p class="disp"><code>log_actions = 0</code></p>
+
+		<p>If set to a nonzero value, each action will be logged.</p>
+		</section>
 	</section>
+
 
 	<section>
 		<h1>HTTP header functions</h1>
 
 		<section class="command" id="req_header">
-			<h1>The <code>req_header</code> function</h1>
+		<h1>The <code>req_header</code> function</h1>
 
-			<p class="disp"><code><var>$value</var> = req_header(<var>$name</var>);</code></p>
+		<p class="disp"><code><var>$value</var> =
+		req_header(<var>$name</var>);</code></p>
 
-			<p>The <code>req_header</code> function returns the value of the request header <var>$name</var>, if one is given by the client, or <code>null</code> if not.</p>
+		<p>The <code>req_header</code> function returns the value of the
+		request header <var>$name</var>, if one is given by the client, or
+		<code>null</code> if not.</p>
 		</section>
 
 		<section class="command" id="http_status">
-			<h1>The <code>http_status</code> function</h1>
+		<h1>The <code>http_status</code> function</h1>
 
-			<p class="disp"><code>http_status(<var>$code</var>)</code></p>
+		<p class="disp"><code>http_status(<var>$code</var>)</code></p>
 
-			<p>The <code>http_status</code> function adds to the output
-			an HTTP status header corresponding to the given HTTP
-			status code.</p>
+		<p>The <code>http_status</code> function adds to the output an HTTP
+		status header corresponding to the given HTTP status code.</p>
 
-			<p>This function is intended for extensions, like the
-			images subserver, that need more control over the
-			headers.</p>
+		<p>This function is intended for extensions, like the images subserver,
+		that need more control over the headers.</p>
 		</section>
 
 		<section class="command" id="redirect">
@@ -544,7 +589,7 @@
 		</section>
 
 		<section class="command">
-			<h1>The error_* functions</h1>
+			<h1>The <code>error_</code> functions</h1>
 
 			<p><code>error_&lt;<i>type</i>&gt;()</code></p>
 
@@ -596,8 +641,6 @@
 			<p><code>announce_file($filename, $size=null)</code></p>
 		</section>
 	</section>
-
-
 
 	<section id="debug">
 		<h1>Debugging</h1>
@@ -693,17 +736,69 @@
 
 			<p>The <code>auth</code> function adds the pair
 			(<var>type</var>, <var>id</var>) to the user's list of
-			credentials.</p>
-
-			<p>The identifier is secondary to the user type and may be
-			omitted. It is a normal value as if it was set using the
-			<code>set</code> function, only brought up for convenience
-			since applications often need to use identifiers along with
-			types.</p>
+			credentials. The identifier is secondary to the user type
+			and may be omitted.</p>
 
 			<p>If there is a pair with the same type, it is replaced.
-			All the additional data related to the discarded type is
+			All the additional data related to the discarded pair is
 			cleared.</p>
+		</section>
+
+		<section class="command" id="user-transfer">
+			<h1>The <code>user::transfer</code> function</h1>
+
+			<p class="disp"><code>user::transfer(<var>$type</var>);</code></p>
+
+			<p>The <code>user::transfer</code> function allows to move all session data associated with the guest identity to another identity of the given type.</p>
+
+			<p>This might be needed, for example, to preserve the shopping cart a user has created before logging in. In that case the authorisation might look like:</p>
+
+<pre class="disp"><i>(...check login data...)</i>
+// Add new identity
+user::auth('customer', 42);
+// Move the session data to the new identity
+user::transfer('customer');</pre>
+		</section>
+
+		<section class="command" id="user-select">
+			<h1>The <code>user::select</code> function</h1>
+
+			<p class="disp"><code><var>$ok</var> =
+				user::select(<var>$type</var>);</code></p>
+
+			<p>The <code>user::select</code> function selects the pair
+			with the given type from the current user's credentials, if
+			such exists, and returns <code>true</code> on success or
+			<code>false</code> on failure.</p>
+
+			<p>Applications typically call <code>user::select</code> to
+			check that the user was authorized as a particular type and
+			to get other values attached to that type using
+			<code>user::id</code> and <code>user::get</code>.</p>
+
+<pre class="disp">// Check that the user is an editor
+if(!user::select('editor')) {
+	error_forbidden("Only editors can view this");
+}
+
+// Use session data associated with the editor credentials
+$id = user::get('last-article');
+if($id) {
+	redirect(url_t("articles/$id"));
+}
+...</pre>
+		</section>
+
+		<section class="command" id="user-clear">
+			<h1>The <code>user::clear</code> function</h1>
+
+			<p class="disp"><code>user::clear(<var>$type</var>);</code></p>
+
+			<p>The <code>user::clear</code> function removes the
+			credentials pair with the given type along with additional
+			data that might be attached to it.</p>
+
+			<p>In other words, this is the logout function.</p>
 		</section>
 
 		<section class="command" id="user-type">
@@ -844,11 +939,14 @@
 			<p>The file format is plain text with a repeated sequence
 			of lines: (message line, translation line, empty line). An example would be:</p>
 
-<pre class="disp">Hello, world!
-Howdy, globe!
+<pre>Hello
+Hey man
 
-How are ya?
+How do you do?
 Wassup?
+
+Popular items
+Funky stuff
 </pre>
 		</section>
 

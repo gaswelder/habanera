@@ -1,10 +1,17 @@
 "use strict";
 (function(){
 
+window.addEventListener( 'load', function() {
+	var toc = createTOC();
+	var ref = createRef();
+	var b = document.body;
+	var h = b.querySelector('h1');
+	b.insertBefore(ref, h.nextSibling);
+	b.insertBefore(toc, h.nextSibling);
+});
+
 var AUTO_ID = autoIdNeeded();
 var autoId = 0;
-
-window.addEventListener( 'load', createTOC );
 
 function autoIdNeeded() {
 	var S = document.getElementsByTagName( 'script' );
@@ -20,15 +27,16 @@ function createTOC()
 {
 	var item = getItem( document.body );
 	if( !item ) {
-		return;
+		return null;
 	}
 
 	var toc = document.createElement( 'nav' );
 	toc.className = 'toc';
 	toc.innerHTML = buildTOC( item.children )
 
-	var h = item.header;
-	h.parentNode.insertBefore( toc, h.nextElementSibling );
+	return toc;
+	//var h = item.header;
+	//h.parentNode.insertBefore( toc, h.nextElementSibling );
 }
 
 function Item() {
@@ -65,6 +73,9 @@ function getItem( container )
  */
 function getHeader( container )
 {
+	if(container.classList.contains('command')) {
+		return null;
+	}
 	/*
 	 * Take header element as the first child "h1" element.
 	 */
@@ -82,6 +93,9 @@ function getHeader( container )
 function getChildItems( container )
 {
 	var items = [];
+	if(container.classList.contains('no-toc')) {
+		return items;
+	}
 
 	var C = container.childNodes;
 	var n = C.length;
@@ -132,4 +146,53 @@ function buildTOC( items )
 	return s;
 }
 
+
+function createRef()
+{
+	// get all 'command' sections
+	var C = document.body.querySelectorAll('.command');
+
+	// go through each section and build an index
+	var s = '';
+	var currentHead = '';
+	var n = C.length;
+	for(var i = 0; i < n; i++)
+	{
+		var commandSection = C[i];
+
+		var head = parentHeading(commandSection);
+
+		// If new parent, start new section
+		if(head != currentHead) {
+			currentHead = head;
+			if(s != '') s += '</ul></div>';
+			s += '<div><b>' + head + '</b><ul>';
+		}
+
+		// Add the link to the command
+		var name = commandName(commandSection);
+		var href = '#' + commandSection.id;
+		s += '<li><a href="'+href+'">'+name+'</a></li>';
+	}
+	s += '</ul></div>';
+
+	var nav = document.createElement('nav');
+	nav.innerHTML = s;
+	nav.className = 'ref';
+	return nav;
+	//document.body.insertBefore(nav, document.body.firstChild);
+}
+
+function commandName(section) {
+	var h = section.querySelector('h1');
+	var c = h.querySelector('code');
+	if(c) return c.innerHTML;
+	return h.innerHTML;
+}
+
+function parentHeading(section) {
+	var p = section.parentNode;
+	var h = p.querySelector('h1');
+	return h.innerHTML;
+}
 })();

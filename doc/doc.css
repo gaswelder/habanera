@@ -1,29 +1,33 @@
 html {
 	background: #f0f0f0;
+	background-color: white;
 }
 
 body {
-	padding: 2cm 4cm 1cm 3.6cm;
-	font-family: Arial, sans-serif;
-	font-size: 12pt;
-	color: #222;
-	line-height: 1.3em;
-	width: 36em;
+/*
+
 	margin: auto;
-	background: white;
+*/
+	padding: 2cm 4cm 1cm 3.6cm;
+	width: 36em;
+	font-family: arial, sans-serif;
+	font-size: 12pt;
+	line-height: 1.3em;
+	color: #222;
+	background-color: white;
 }
 
 h1 {
-	font-size: 24pt;
+	font-size: 18pt;
 	margin-bottom: 1em;
 }
 
 h2, section h1 {
-	font-size: 18pt;
+	font-size: 16pt;
 }
 
 h3, section section h1 {
-	font-size: 14pt;
+	font-size: 12pt;
 }
 
 article, section {
@@ -34,8 +38,21 @@ p + p {
 	margin: 1em 0;
 }
 
-code, pre {
+p {
+	text-align: justify;
+}
+
+p.disp {
+	text-align: left;
+}
+
+code {
 	font-size: 11pt;
+}
+
+pre {
+	font-size: 10pt;
+	margin-left: 3em;
 }
 
 table {
@@ -109,4 +126,18 @@ ul, ol {
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
+}
+
+.ref {
+	-moz-columns: 7em;
+}
+
+.ref ul {
+	list-style-position: inside;
+	margin-left: 0;
+	margin-top: 0;
+}
+
+.ref b {
+	font-size: 90%;
 }
