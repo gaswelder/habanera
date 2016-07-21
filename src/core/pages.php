@@ -293,10 +293,18 @@ class pages
 	static function url_t( $path = '' )
 	{
 		/*
-		 * We have to get the omitted part too to build the correct
-		 * URL.
+		 * If path starts with a slash, then it is relative to the
+		 * site root URL. If not, then it is relative to the current
+		 * "directory".
 		 */
-		return h2::prefix() . $path;
+		$base = '';
+		if( strlen( $path ) > 0 && $path[0] == '/' ) {
+			$base = h2::base();
+		}
+		else {
+			$base = h2::prefix();
+		}
+		return $base . $path;
 	}
 
 }
