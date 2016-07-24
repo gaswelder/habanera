@@ -199,10 +199,6 @@ class actions
 			self::log( $action_name, $errors );
 		}
 
-		if( !empty( $errors ) ) {
-			warning( "Action '$action_name' errors: " . implode( '; ', $errors ) );
-		}
-
 		/*
 		 * Do the redirect or output depending on what is needed.
 		 */
@@ -362,7 +358,7 @@ class actions
 			$status = 'OK';
 		}
 		else {
-			$status = count( $errors ) . ' errors';
+			$status = count( $errors ) . ' errors: ' . implode( '; ', $errors );
 		}
 
 		log_message( "$action_name	$status", 'actions' );
