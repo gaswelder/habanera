@@ -3,6 +3,8 @@
 class _mime
 {
 	private static $types = array(
+		'.xml' => 'application/xml',
+		'.gz' => 'application/gzip',
 		'.xls' => 'application/vnd.ms-excel',
 		'.xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 		'.zip' => 'application/zip',
