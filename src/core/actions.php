@@ -55,7 +55,7 @@ function action_errors()
 	}
 
 	$id = $_GET[actions::ACTION_ID];
-	$data = user::get_data( $id );
+	$data = user::get( $id );
 	if( !$data ) return array();
 	return $data['errors'];
 }
@@ -331,7 +331,7 @@ class actions
 		if( !empty( $errors ) )
 		{
 			$id = uniqid();
-			user::set_data( $id, array(
+			user::set( $id, array(
 				'errors' => $errors,
 				'context' => array_merge( $_GET, $_POST )
 			));
