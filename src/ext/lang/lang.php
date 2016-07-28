@@ -137,7 +137,7 @@ class lang
 	 * Returns path for the given language file.
 	 */
 	private static function path( $lang ) {
-		$path = APP_DIR . 'lang/' . strtolower( $lang );
+		$path = h2::appdir() . 'lang/' . strtolower( $lang );
 	}
 }
 

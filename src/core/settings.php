@@ -68,7 +68,7 @@ class settings
 
 	private static function load( $path )
 	{
-		$path = APP_DIR.$path;
+		$path = h2::appdir().$path;
 		if( !file_exists( $path ) ) {
 			return false;
 		}

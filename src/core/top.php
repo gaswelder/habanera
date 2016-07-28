@@ -29,6 +29,8 @@ function current_url() {
 
 class h2
 {
+	private static $appdir;
+
 	private static $url = null;
 	private static $domain = null;
 	private static $req = null;
@@ -58,6 +60,10 @@ class h2
 		}
 		array_unshift( self::$serve_functions, $func );
 		return true;
+	}
+
+	static function appdir() {
+		return self::$appdir;
 	}
 
 	static function url() {
@@ -99,7 +105,8 @@ class h2
 			error( "No directory '$appdir'" );
 			return false;
 		}
-		define( 'APP_DIR', realpath( $appdir ) . '/' );
+
+		self::$appdir = realpath( $appdir ) . '/';
 
 		/*
 		 * WRITE_DIR is a directory in which the script will be writing some
@@ -107,7 +114,7 @@ class h2
 		 * through HTTP.
 		 */
 		if( !defined( 'WRITE_DIR' ) ) {
-			define( 'WRITE_DIR', APP_DIR.'tmp/' );
+			define( 'WRITE_DIR', self::$appdir.'tmp/' );
 		}
 
 		/*
@@ -161,9 +168,9 @@ class h2
 
 		mb_internal_encoding( 'UTF-8' );
 
-		add_classes_dir( APP_DIR.'classes' );
-		if( file_exists( APP_DIR.'init.php' ) ) {
-			require APP_DIR.'init.php';
+		add_classes_dir( self::$appdir.'classes' );
+		if( file_exists( self::$appdir.'init.php' ) ) {
+			require self::$appdir.'init.php';
 		}
 
 		load_ext( 'snippets' );

@@ -42,7 +42,7 @@ class mails
 			$src .= "$k: $v\r\n";
 		}
 		$src .= "\r\n" . $body;
-		file_put_contents( APP_DIR.$path, $src );
+		file_put_contents( h2::appdir().$path, $src );
 		return true;
 	}
 

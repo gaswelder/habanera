@@ -219,7 +219,7 @@ class actions
 		 * Load files from the actions directory until the needed
 		 * function is defined.
 		 */
-		$paths = glob( APP_DIR . 'actions/'.'*.php' );
+		$paths = glob( h2::appdir() . 'actions/'.'*.php' );
 		foreach( $paths as $path )
 		{
 			require( $path );

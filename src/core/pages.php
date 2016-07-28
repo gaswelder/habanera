@@ -104,7 +104,7 @@ class pages
 		/*
 		 * Start from the root of the pages directory.
 		 */
-		$path = APP_DIR.'pages';
+		$path = h2::appdir().'pages';
 		self::enter_dir( $path );
 		$i = 0;
 

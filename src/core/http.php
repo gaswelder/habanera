@@ -84,7 +84,7 @@ class http_w
 	 */
 	private static function get_error_page( $errno )
 	{
-		$path = APP_DIR . "error-pages/$errno.htm";
+		$path = h2::appdir() . "error-pages/$errno.htm";
 		if( file_exists( $path ) ) {
 			return file_get_contents( $path );
 		}
