@@ -26,8 +26,8 @@ class h2_logs
 		 */
 		$cols = array(
 			date( 'd.m.Y H:i:s' ),
-			self::usertag(),
 			$msg,
+			self::usertag(),
 			current_url(),
 			req_header( 'User-Agent' )
 		);
