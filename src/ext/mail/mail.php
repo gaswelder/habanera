@@ -19,7 +19,7 @@ class mails
 			$add_headers = array();
 		}
 
-		log_message( "$address	$title", 'send_mail' );
+		log_message( "Mail to $address ($title)" );
 
 		// development mock
 		if( setting( 'debug' ) ) {

@@ -361,7 +361,7 @@ class actions
 			$status = count( $errors ) . ' errors: ' . implode( '; ', $errors );
 		}
 
-		log_message( "$action_name	$status", 'actions' );
+		log_message( "Action: $action_name ($status)" );
 	}
 }
 ?>

@@ -3,15 +3,8 @@
 /*
  * Writes a message to the given log.
  */
-function log_message( $message, $logname = 'log' ) {
-	return h2_logs::log( $message, $logname );
-}
-
-/*
- * A shortcut for debug messages.
- */
-function msg( $message ) {
-	log_message( $message, 'debug' );
+function log_message( $message ) {
+	return h2_logs::log( $message );
 }
 
 /*
@@ -24,9 +17,9 @@ class h2_logs
 	/*
 	 * Buffer for messages.
 	 */
-	private static $buf = array();
+	private static $buf = '';
 
-	static function log( $msg, $logname = 'log' )
+	static function log( $msg )
 	{
 		/*
 		 * Compose the log line.
@@ -43,12 +36,7 @@ class h2_logs
 		/*
 		 * Put the line to the buffer.
 		 */
-		if( !isset( self::$buf[$logname] ) ) {
-			self::$buf[$logname] = $out;
-		}
-		else {
-			self::$buf[$logname] .= $out;
-		}
+		self::$buf .= $out;
 	}
 
 	/*
@@ -68,10 +56,9 @@ class h2_logs
 
 	static function flush()
 	{
-		foreach( self::$buf as $logname => $lines ) {
-			files::append( 'logs', "$logname.log", $lines );
-		}
-		self::$buf = array();
+		if( self::$buf == '' ) return;
+		files::append( '', "log.log", self::$buf );
+		self::$buf = '';
 	}
 }
 

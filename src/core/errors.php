@@ -14,11 +14,9 @@ function on_error( $func ) {
 }
 
 function warning( $message ) {
+	log_message( 'Warning: '.$message );
 	if( debug() ) {
 		error( $message );
-	}
-	else {
-		log_message( 'Warning: '.$message, 'errors' );
 	}
 }
 
@@ -40,7 +38,7 @@ class _error_handlers
 			return false;
 		}
 
-		self::log_error( $msg, $file, $line );
+		log_message( "Error: $msg at $file:$line" );
 
 		foreach( self::$F as $f ) {
 			if( call_user_func( $f, $msg, "$file:$line" ) === true ) {
@@ -48,22 +46,6 @@ class _error_handlers
 			}
 		}
 		error_server();
-	}
-
-	private static function log_error( $msg, $file, $line )
-	{
-		$agent = req_header( "User-Agent" );
-		if( $agent === null ) {
-			$agent = "(unknown agent)";
-		}
-		$str = implode( "\t", array(
-			"$msg at $file:$line",
-			$_SERVER['REQUEST_URI'],
-			$agent,
-			$_SERVER['REMOTE_ADDR']
-		));
-		error_log( $str );
-		log_message( $str, 'errors' );
 	}
 }
 
