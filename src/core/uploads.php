@@ -93,6 +93,11 @@ class uploads
 				continue;
 			}
 
+			if( setting( 'log_uploads' ) ) {
+				$size = round( $file['size'] / 1024, 2 );
+				log_message( "Upload: $file[name] to $path ($size KB)" );
+			}
+
 			$paths[] = $path;
 		}
 		return $paths;
