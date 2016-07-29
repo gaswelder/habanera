@@ -1,11 +1,12 @@
 <?php
 
 function accept_uploads( $input_name, $dest_dir ) {
-	return uploads::accept_uploads( $input_name, $dest_dir );
+	$files = uploads::get( $input_name );
+	return uploads::save( $files, $dest_dir );
 }
 
 function uploaded_files( $input_name ) {
-	return uploads::get_uploads( $input_name );
+	return uploads::get( $input_name );
 }
 
 /*
@@ -13,20 +14,51 @@ function uploaded_files( $input_name ) {
  */
 class uploads
 {
-	static function get_uploads( $input_name )
+	/*
+	 * Returns array of "dicts" {type, tmp_name, error, size, name}
+	 * describing files uploaded through the input with the given
+	 * Returns null if there is no such input.
+	 */
+	static function get( $input_name )
 	{
 		if( !isset( $_FILES[$input_name] ) ) {
 			return array();
 		}
-		return self::get_files( $input_name );
+
+		$files = array();
+
+		/*
+		 * Single-file case.
+		 */
+		if( !is_array( $_FILES[$input_name]['name'] ) )
+		{
+			if( $_FILES[$input_name]['name'] != '' ) {
+				$files[] = $_FILES[$input_name];
+			}
+			return $files;
+		}
+
+		/*
+		 * Multiple-file case.
+		 */
+		$fields = array( "type", "tmp_name", "error", "size", "name" );
+		foreach( $_FILES[$input_name]["name"] as $i => $name )
+		{
+			if( $_FILES[$input_name]['name'][$i] == '' ) {
+				continue;
+			}
+			$input = array();
+			foreach( $fields as $f ){
+				$input[$f] = $_FILES[$input_name][$f][$i];
+			}
+			$files[$i] = $input;
+		}
+
+		return $files;
 	}
 
-	static function accept_uploads( $input_name, $dest_dir )
+	static function save( $files, $dest_dir )
 	{
-		if( !isset( $_FILES[$input_name] ) ) {
-			return array();
-		}
-
 		/*
 		 * Make sure dest_dir ends with a slash.
 		 */
@@ -42,8 +74,7 @@ class uploads
 			return array();
 		}
 
-		$accepted = array();
-		$files = self::get_files( $input_name );
+		$paths = array();
 		foreach( $files as $file )
 		{
 			if( $file['error'] || !$file['size'] ) {
@@ -62,49 +93,9 @@ class uploads
 				continue;
 			}
 
-			$accepted[] = $path;
+			$paths[] = $path;
 		}
-
-		return $accepted;
-	}
-
-	/*
-	 * Returns array of "dicts" {type, tmp_name, error, size, name}
-	 * describing files uploaded through the input with the given
-	 * Returns null if there is no such input.
-	 */
-	private static function get_files( $input_name )
-	{
-		$inputs = array();
-
-		/*
-		 * Single-file case.
-		 */
-		if( !is_array( $_FILES[$input_name]["name"] ) )
-		{
-			if( $_FILES[$input_name]['name'] != '' ){
-				$inputs[] = $_FILES[$input_name];
-			}
-			return $inputs;
-		}
-
-		/*
-		 * Multiple-file case.
-		 */
-		$fields = array( "type", "tmp_name", "error", "size", "name" );
-		foreach( $_FILES[$input_name]["name"] as $i => $name )
-		{
-			if( $_FILES[$input_name]['name'][$i] == '' ) {
-				continue;
-			}
-			$input = array();
-			foreach( $fields as $f ){
-				$input[$f] = $_FILES[$input_name][$f][$i];
-			}
-			$inputs[$i] = $input;
-		}
-
-		return $inputs;
+		return $paths;
 	}
 
 	/*
