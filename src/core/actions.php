@@ -267,7 +267,7 @@ class actions
 		 * them with a generic message.
 		 */
 		if( strlen( $out ) > 0 ) {
-			warning( "Action function '$func' produced output: $out" );
+			warning( "Action function '$action_name' produced output: $out" );
 			$errors[] = 'Unspecified internal error';
 		}
 
