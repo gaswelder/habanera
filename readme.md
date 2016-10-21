@@ -6,5 +6,5 @@ Its goal always was to be as unimposing as possible while solving many
 problems typical for websites I built, which ranged in complexity from
 simple page-oriented ones to complicated shops and catalogs.
 
-* [Site setup](src/setup.md)
-* [Concepts and API](src/doc.md)
+* [Site setup](setup.md)
+* [Concepts and API](doc.md)
