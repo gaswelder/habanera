@@ -161,7 +161,7 @@ class h2
 		self::$req = $req;
 
 		if( !self::check_url( $req ) ) {
-			error_log( "Bad URL: $url" );
+			error_log( "Bad URL: " . self::$url );
 			error_bad_request();
 		}
 
