@@ -45,6 +45,7 @@ class _error_handlers
 				return true;
 			}
 		}
+		error_log( "$msg at $file:$line" );
 		error_server();
 	}
 }
