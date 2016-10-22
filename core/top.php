@@ -75,7 +75,11 @@ class h2
 	}
 
 	static function base() {
-		return self::$domain . '/' . self::$base;
+		$b = self::$domain;
+		if( self::$base ) {
+			$b .= '/' . self::$base;
+		}
+		return $b;
 	}
 
 	static function prefix() {
