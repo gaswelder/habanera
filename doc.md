@@ -206,51 +206,14 @@ will be logged in the application log.
 
 ## User sessions
 
-In many cases a website requires the user to be identified through a
-login form. After that the obtained credentials are stored in the
-session.
+A website often requires the user to be identified through a login
+form. After the identification the obtained result is stored in the
+session data.
 
 After the authorisation the app will call the `user::auth` function to
 store the user type and identifier in the session. After that the
 stored parameters may be checked using the `user::type` and `user::id`
 functions.
-
-
-### Multiple credentials
-
-Another problem is assigning multiple credentials to one user. Suppose
-a single site hosts two admin interfaces, one for editor and one for
-reviewer. There are different accounts for both roles, and different
-people are expected to be behind different roles, but suppose there is
-a person who happens to work as both. When that person tries to access
-the editor page, they are asked to log in and marked as an 'editor'. If
-after that the person goes to the reviews page and logs in there, they
-will be now marked as a 'reviewer' and will lose access to the editor's
-page, unless there is a way to keep authorisation for both roles.
-
-Therefore one user has to be able keep multiple credentials
-simultaneuosly. Now the 'editor' page will have then first to declare
-that an 'editor' is expected before checking the keys. Upon receiving
-that declaration the session system will have to see if there are
-'editor' credentials and switch to them, or stay at previous
-credentials if there are not. The same will go to actions. If an action
-"save_review" is declared for users of type 'reviewer' and 'big_boss',
-the actions subserver will use whichever role is in the user's session.
-
-To add multiple credentials just call `user::auth` multiple times. Each
-call must have different `type` argument. If the `type` argument is
-repeated, the existing credentials of that type are removed before the
-new one is added.
-
-
-### Session data
-
-Besides the credentials, sessions store other data, like a "shopping
-cart". The data is bound to roles, so that data stored in the 'editor'
-context doesn't interfere with the data stored in the 'reviewer'
-context. It follows then that a user must have at least one role to be
-allowed to store any data, so there is a special "guest" role which all
-users always have.
 
 * `user::auth($type, $id=null)`
 
@@ -260,21 +223,29 @@ users always have.
 	If there is a pair with the same type, it is replaced. All the
 	additional data related to the discarded pair is cleared.
 
-* `user::transfer($type)`
+* `$type = user::type()`
 
-	Allows to move all session data associated with the guest identity
-	to another identity of the given type.
+	Returns the type of the user's current identity.
 
-	This might be needed, for example, to preserve the shopping cart a
-	user has created before logging in. In that case the authorisation
-	might look like:
+* `$id = user::id()`
 
-	```php
-	// Add new identity
-	user::auth('customer', 42);
-	// Move the session data to the new identity
-	user::transfer('customer');
-	```
+	Returns the identifier of the user's current identity.
+
+
+### Multiple credentials
+
+Suppose a single site hosts two admin interfaces, one for the editor
+and one for the reviewer. Suppose there is a person who happens to work
+as both. In order for them to work with both interfaces simultaneously,
+multiple credentials have to be supported by the system.
+
+To add multiple credentials just call `user::auth` multiple times. Each
+call must have different `type` argument.
+
+Now the 'editor' page will have to declare that an 'editor' is
+expected, and the reviewer page will expect a 'reviewer'. This can be
+declared with the `user::select` function.
+
 * `user::select($type)`
 
 	Selects the pair with the given type from the current user's
@@ -299,20 +270,17 @@ users always have.
 	...
 	```
 
-* `user::clear($type)`
 
-	Removes the credentials pair with the given type along with
-	additional data that might be attached to it.
+### Session data
 
-	In other words, this is the logout function.
+Besides the credentials, sessions store other data, like a "shopping
+cart". The data is bound to credentials, so that data stored in the
+'editor' context doesn't interfere with the data stored in the
+'reviewer' context.
 
-* `user::type()`
-
-	Returns the type of the user's current identity.
-
-* `user::id()`
-
-	Returns the identifier of the user's current identity.
+It follows then that a user must have at least one role to be allowed
+to store any data, so there is a special "guest" role which all users
+always have.
 
 * `user::set($key, $val)`
 
@@ -322,6 +290,31 @@ users always have.
 
 	Returns data associated with the given key under the current
 	identity. Returns `null` if there was no data set.
+
+* `user::transfer($type)`
+
+	Allows to move all session data associated with the guest identity
+	to another identity of the given type.
+
+	This might be needed, for example, to preserve the shopping cart a
+	user has created before logging in. In that case the authorisation
+	might look like:
+
+	```php
+	// Add new identity
+	user::auth('customer', 42);
+	// Move the session data to the new identity
+	user::transfer('customer');
+	```
+
+### Logging out
+
+* `user::clear($type)`
+
+	Removes the credentials pair with the given type along with
+	additional data that might be attached to it.
+
+	In other words, this is the logout function.
 
 
 ## Core functions
