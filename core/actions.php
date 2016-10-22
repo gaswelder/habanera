@@ -183,17 +183,41 @@ class actions
 		/*
 		 * Check that the action exists and the user may access it.
 		 */
-		if( !self::action_exists( $action_name ) ) {
+		$func = self::find_action( $action_name );
+		if( !$func ) {
 			error_notfound();
 		}
 		if( !self::action_allowed( $action_name ) ) {
 			error_forbidden();
 		}
 
+		ob_start();
+		$result = call_user_func( $func );
+		$out = ob_get_clean();
+
+		$errors = array();
 		/*
-		 * Run the action and receive errors, if any.
+		 * If the buffer is not empty, we assume it has PHP error
+		 * messages.
 		 */
-		$errors = self::run_action( $action_name );
+		if( strlen( $out ) > 0 ) {
+			warning( "Action function '$action_name' produced output: $out" );
+			$errors[] = 'Unspecified internal error';
+		}
+
+		/*
+		 * To indicate an error, the action may return false, an error
+		 * message (a string), or an array of error messages.
+		 */
+		if( $result === false ){
+			$errors[] = 'Unspecified action error';
+		}
+		else if( is_string( $result ) ) {
+			$errors[] = $result;
+		}
+		else if( is_array( $result ) ) {
+			$errors = $result;
+		}
 
 		if( setting( 'log_actions' ) ) {
 			self::log( $action_name, $errors );
@@ -210,10 +234,7 @@ class actions
 		}
 	}
 
-	/*
-	 * Returns true if the given action is defined.
-	 */
-	private static function action_exists( $action_name )
+	private static function find_action( $action_name )
 	{
 		/*
 		 * Load files from the actions directory until the needed
@@ -224,10 +245,10 @@ class actions
 		{
 			require( $path );
 			if( isset( self::$funcs[$action_name] ) ) {
-				return true;
+				return self::$funcs[$action_name];
 			}
 		}
-		return false;
+		return null;
 	}
 
 	/*
@@ -243,49 +264,6 @@ class actions
 			}
 		}
 		return false;
-	}
-
-	private static function run_action( $action_name )
-	{
-		if( !isset( self::$funcs[$action_name] ) ) {
-			error( "Action function doesn't exist: '$func'" );
-		}
-		$func = self::$funcs[$action_name];
-
-		/*
-		 * Turn on buffer in case errors start raining.
-		 */
-		ob_start();
-		$result = call_user_func( $func );
-		$out = ob_get_clean();
-
-		$errors = array();
-
-		/*
-		 * If the buffer is not empty, we presume it has PHP error
-		 * messages. We can't put them to the application, so we replace
-		 * them with a generic message.
-		 */
-		if( strlen( $out ) > 0 ) {
-			warning( "Action function '$action_name' produced output: $out" );
-			$errors[] = 'Unspecified internal error';
-		}
-
-		/*
-		 * To indicate an error, the action can return false, an error
-		 * message (a string), or an array of error messages.
-		 */
-		if( $result === false ){
-			$errors[] = 'Unspecified action error';
-		}
-		else if( is_string( $result ) ) {
-			$errors[] = $result;
-		}
-		else if( is_array( $result ) ) {
-			$errors = $result;
-		}
-
-		return $errors;
 	}
 
 	/*
