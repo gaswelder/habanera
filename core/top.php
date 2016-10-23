@@ -27,6 +27,18 @@ function current_url() {
 	return h2::url();
 }
 
+function limit_args($min = 0, $max = 0)
+{
+	$n = 0;
+	while( arg( $n ) !== null && arg( $n ) !== '' ) {
+		$n++;
+	}
+
+	if( $n < $min || $n > $max ) {
+		error_notfound();
+	}
+}
+
 class h2
 {
 	private static $appdir;

@@ -343,6 +343,30 @@ always have.
 	call to `poparg` the indices shift by one, so the value returned
 	for `arg(1)` will now be returned with the call `arg(0)`.
 
+* `limit_args($min=0, $max=0)`
+
+	Calls `error_notfound` if the number of page arguments is less than
+	`min` or greater than `max`. Arguments omitted with the `poparg`
+	function don't count.
+
+	The script foo will be called for all URLs "foo[/...]" (if there
+	will be no closer match). This means, all URLs will be matched by
+	at least one page (the home page).
+
+	A page may or may not process its further arguments. For URL
+	purity, which may be desirable for SEO-minded people, a page script
+	would have to return a `Not Found` error if there are too many
+	arguments. This kind of check would be very simple, but annoingly
+	repetitive, thus the `limit_args` function.
+
+	A page that doesn't accept any arguments might manifest it like below:
+
+		limit_args();
+
+	A page that expects at least one parameter would have this:
+
+		limit_args(1);
+
 
 ## Request data
 
