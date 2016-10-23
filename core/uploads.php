@@ -5,56 +5,79 @@ function accept_uploads( $input_name, $dest_dir ) {
 	return uploads::save( $files, $dest_dir );
 }
 
-function uploaded_files( $input_name ) {
-	return uploads::get( $input_name );
-}
-
 /*
  * This module helps processing file uploads.
  */
 class uploads
 {
+	private static $files = array();
+
 	/*
-	 * Returns array of "dicts" {type, tmp_name, error, size, name}
-	 * describing files uploaded through the input with the given
-	 * Returns null if there is no such input.
+	 * Returns array of "dicts" {type, tmp_name, size, name}
+	 * describing files uploaded through the input with the given name.
+	 * Returns empty array if there is no such input.
 	 */
 	static function get( $input_name )
+	{
+		if( !isset( self::$files[$input_name] ) ) {
+			self::$files[$input_name] = self::prepare_files( $input_name );
+		}
+		return self::$files[$input_name];
+	}
+
+	private static function prepare_files( $input_name )
 	{
 		if( !isset( $_FILES[$input_name] ) ) {
 			return array();
 		}
 
-		$files = array();
-
 		/*
-		 * Single-file case.
+		 * Get file descriptions
 		 */
-		if( !is_array( $_FILES[$input_name]['name'] ) )
-		{
-			if( $_FILES[$input_name]['name'] != '' ) {
-				$files[] = $_FILES[$input_name];
+		$files = array();
+		if( !is_array( $_FILES[$input_name]['name'] ) ) {
+			$files[] = $_FILES[$input_name];
+		}
+		else {
+			$fields = array( "type", "tmp_name", "error", "size", "name" );
+			foreach( $_FILES[$input_name]["name"] as $i => $name )
+			{
+				$input = array();
+				foreach( $fields as $f ){
+					$input[$f] = $_FILES[$input_name][$f][$i];
+				}
+				$files[] = $input;
 			}
-			return $files;
 		}
 
 		/*
-		 * Multiple-file case.
+		 * Filter out files with errors
 		 */
-		$fields = array( "type", "tmp_name", "error", "size", "name" );
-		foreach( $_FILES[$input_name]["name"] as $i => $name )
+		$ok = array();
+		foreach( $files as $file )
 		{
-			if( $_FILES[$input_name]['name'][$i] == '' ) {
+			/*
+			 * This happens with multiple file inputs with the same
+			 * name marked with '[]'.
+			 */
+			if( $file['error'] == UPLOAD_ERR_NO_FILE ) {
 				continue;
 			}
-			$input = array();
-			foreach( $fields as $f ){
-				$input[$f] = $_FILES[$input_name][$f][$i];
+
+			if( $file['error'] || !$file['size'] ) {
+				$errstr = self::errstr( $file['error'] );
+				warning( "Upload of file '$file[name]' failed ($errstr, size=$file[size])" );
+				continue;
 			}
-			$files[$i] = $input;
+			unset( $file['error'] );
+
+			$size = round( $file['size'] / 1024, 2 );
+			log_message( "Upload: $file[name] ($size KB)" );
+
+			$ok[] = $file;
 		}
 
-		return $files;
+		return $ok;
 	}
 
 	static function save( $files, $dest_dir )
@@ -77,12 +100,6 @@ class uploads
 		$paths = array();
 		foreach( $files as $file )
 		{
-			if( $file['error'] || !$file['size'] ) {
-				$errstr = self::errstr( $file['error'] );
-				warning( "Upload of file '$file[name]' failed ($errstr, size=$file[size])" );
-				continue;
-			}
-
 			$path = self::newpath( $file, $dest_dir );
 			if( !$path ) {
 				continue;
@@ -93,10 +110,7 @@ class uploads
 				continue;
 			}
 
-			if( setting( 'log_uploads' ) ) {
-				$size = round( $file['size'] / 1024, 2 );
-				log_message( "Upload: $file[name] to $path ($size KB)" );
-			}
+			log_message( "Upload: save $file[name] to $path" );
 
 			$paths[] = $path;
 		}
