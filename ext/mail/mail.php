@@ -1,91 +1,172 @@
 <?php
 
-function send_mail( $address, $text, $subject = null, $add_headers = null ){
-	return mails::send_mail( $address, $text, $subject, $add_headers );
-}
-
-class mails
+class mail
 {
-	static function send_mail( $address, $body, $title = null, $add_headers = null )
+	// Map of mail headers. Most common are "To", "From", "Subject",
+	// "BCC".
+	private $headers = array();
+
+	// MIME parts, arrays with "headers" and "body" keys.
+	private $parts = array();
+
+	function __construct()
 	{
-		if( !$address ) {
-			error( 'Empty email at send_mail' );
-			return false;
-		}
-		if( !$title ){
-			$title = $_SERVER['SERVER_NAME'].' notification';
-		}
-		if( !is_array( $add_headers ) ) {
-			$add_headers = array();
-		}
+		$this->headers = array(
+			'Date' => date( 'r' ),
+			'MIME-Version' => '1.0'
+		);
+	}
 
-		log_message( "Mail to $address ($title)" );
+	function set_subject( $text ) {
+		$this->headers['Subject'] = self::encode_string( $text );
+	}
 
-		// development mock
-		if( setting( 'debug' ) ) {
-			return self::mock_send( $address, $body, $title, $add_headers );
+	function set_header( $name, $value ) {
+		$this->headers[$name] = $value;
+	}
+
+	function get_header( $name ) {
+		if( isset( $this->headers[$name] ) ) {
+			return $this->headers[$name];
+		}
+		return null;
+	}
+
+	function set_text( $src, $mime_type = null )
+	{
+		if( !$mime_type ) {
+			$mime_type = 'text/plain; charset="UTF-8"';
 		}
 		else {
-			return self::real_send( $address, $body, $title, $add_headers );
-		}
-	}
-
-	private static function mock_send( $address, $body, $title, $headers )
-	{
-		$bom = "\xEF\xBB\xBF";
-		$path = time().'_'.uniqid().'.txt';
-		$headers['To'] = $address;
-		$headers['Subject'] = $title;
-
-		$src = $bom;
-		foreach( $headers as $k => $v ) {
-			$src .= "$k: $v\r\n";
-		}
-		$src .= "\r\n" . $body;
-		file_put_contents( h2::appdir().$path, $src );
-		return true;
-	}
-
-	private static function real_send( $address, $body, $title, $add_headers )
-	{
-		$headers = array(
-			'Content-Type: text/plain; charset="UTF-8"',
-			'Date: '.date( 'r' )
-		);
-
-		/*
-		 * On Windows "From" header in the form of
-		 * "User name <user-address>" gets transformed to
-		 * "<User name <user-address>>".
-		 */
-
-		if( !isset( $add_headers['From'] ) ) {
-			$headers[] = "From: noreply@$_SERVER[HTTP_HOST]";
-		}
-
-		if( $add_headers ) {
-			foreach( $add_headers as $k => $v ) {
-				$headers[] = "$k: $v";
+			if( !strpos( $mime_type, 'charset' ) ) {
+				$mime_type .= '; charset="UTF-8';
 			}
 		}
 
-		if( self::is_ascii( $title ) ){
-			$subject = $title;
-		} else {
-			$subject = "=?UTF-8?B?".base64_encode( $title )."?=";
+		$headers = array(
+			'Content-Type' => $mime_type
+			//'Content-Transfer-Encoding' => 'base64'
+		);
+
+		//$body = chunk_split( base64_encode( $src ) );
+		$body = $src;
+
+		$this->parts[] = array(
+			'headers' => $headers,
+			'body' => $body
+		);
+	}
+
+	function attach( $src, $filename = null, $mime_type = null )
+	{
+		if( !$mime_type ) {
+			$mime_type = 'application/octet-stream';
 		}
 
-		ob_start();
-		$r = mail( $address, $subject, $body, implode( "\r\n", $headers ) );
-		$errors = ob_get_clean();
+		$headers = array(
+			'Content-Type' => $mime_type,
+			'Content-Disposition' => 'attachment',
+			'Content-Transfer-Encoding' => 'base64'
+		);
 
-		if( $errors != '' )
+		if( $filename ) {
+			$filename = self::encode_string( $filename );
+			$headers['Content-Disposition'] .= '; filename="'.$filename.'"';
+		}
+
+		$body = chunk_split( base64_encode( $src ) );
+
+		$this->parts[] = array(
+			'headers' => $headers,
+			'body' => $body
+		);
+	}
+
+	function __toString()
+	{
+		$s = '';
+		$headers = $this->headers;
+		if( count( $this->parts ) == 1 )
 		{
-			$errors = strip_tags( $errors );
-			warning( "Error while sending mail: $errors" );
-			return false;
+			// If there is only one part (plain text assumed), add its
+			// headers to the mail headers.
+			$headers = array_merge( $headers, $this->parts[0]['headers'] );
+
+			// Write down all the headers.
+			foreach( $headers as $name => $value ){
+				$s .= "$name: $value\r\n";
+			}
+
+			// Add blank line before the body.
+			$s .= "\r\n";
+
+			$s .= $this->parts[0]['body'];
 		}
-		return $r;
+		else
+		{
+			$boundary = '===='.uniqid().'====';
+			$headers['Content-Type'] = "multipart/mixed; boundary=\"$boundary\"";
+
+			// Write down all the headers.
+			foreach( $headers as $name => $value ){
+				$s .= "$name: $value\r\n";
+			}
+
+			// Add blank line before the body.
+			$s .= "\r\n";
+
+			foreach( $this->parts as $part )
+			{
+				$s .= "--$boundary\r\n";
+
+				$h = $part['headers'];
+				foreach( $h as $name => $value ){
+					$s .= "$name: $value\r\n";
+				}
+				$s .= "\r\n";
+				$s .= $part['body'];
+				$s .= "\r\n";
+			}
+
+			$s .= "--$boundary--";
+		}
+
+		return $s;
+	}
+
+	function send( $to )
+	{
+		/* If we add "To" header here, PHP's "mail" will merge it with
+		its $to argument, and the same address will appear twice (like
+		"foo@b.ar, foo@b.ar"). The same is with "Subject" header. */
+
+		$subject = $this->headers['Subject'];
+		unset( $this->headers['Subject'] );
+		$mail = $this->__toString();
+		$this->headers['Subject'] = $subject;
+
+		$pos = strpos( $mail, "\r\n\r\n" );
+		$headers = substr( $mail, 0, $pos );
+		$body = trim( substr( $mail, $pos ) );
+
+		/* To send the letter "From" header or sendmail_from parameter
+		of php.ini will be used. If none is present, a warning will be
+		given. */
+
+		return mail( $to, $subject, $body, $headers );
+	}
+
+	private static function encode_string( $src )
+	{
+		return $src;
+		/*
+		if( self::is_ascii( $src ) ) {
+			return $src;
+		}
+		$charset = 'UTF-8';
+		$encoding = 'B';
+		$s = "=?$charset?$encoding?" . base64_encode( $src ) . '?=';
+		return $s; */
 	}
 
 	/*

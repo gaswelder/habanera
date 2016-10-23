@@ -511,6 +511,7 @@ The standard extensions are:
 * [Images subserver](ext/images/images.md) (`images`)
 * [`lang`](ext/lang/lang.md) (`gettext` alternative)
 * `mysql`
+* [`mail`](ext/main/mail.md)
 
 
 ## Internal functions
