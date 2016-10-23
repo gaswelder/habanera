@@ -508,10 +508,10 @@ interact with internal API of the framework.
 
 The standard extensions are:
 
-* [Images subserver](ext/images/images.md) (`images`)
+* [`images`](ext/images/images.md) (images subserver)
 * [`lang`](ext/lang/lang.md) (`gettext` alternative)
 * `mysql`
-* [`mail`](ext/main/mail.md)
+* [`mail`](ext/mail/mail.md)
 
 
 ## Internal functions
