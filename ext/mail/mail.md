@@ -11,23 +11,23 @@ The `send_mail` function sends message `msg` to the address `addr`.
 There are two typical use cases. The simple one is just sending some
 text:
 
-	```php
-	send_mail("user@example.net", "Hello, user", "Test mail");
-	```
+```php
+send_mail("user@example.net", "Hello, user", "Test mail");
+```
 
 The complicated one is sending mail with attachments and custom headers:
 
-	```php
-	$mail = new mail();
-	$mail->set_text("Hello, user, see the attachment");
+```php
+$mail = new mail();
+$mail->set_text("Hello, user, see the attachment");
 
-	$data = file_get_contents("file.zip");
-	$mail->attach($data, "file.zip", "application/zip");
+$data = file_get_contents("file.zip");
+$mail->attach($data, "file.zip", "application/zip");
 
-	$mail->set_header("Reply-To", "feedback@site.com");
+$mail->set_header("Reply-To", "feedback@site.com");
 
-	send_mail("user@example.net", $mail, "Test mail");
-	```
+send_mail("user@example.net", $mail, "Test mail");
+```
 
 The `send_mail` function logs a message to the application log on each
 sending.
