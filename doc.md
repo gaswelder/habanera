@@ -552,6 +552,7 @@ The standard extensions are:
 * [`lang`](ext/lang/lang.md) (`gettext` alternative)
 * `mysql`
 * [`mail`](ext/mail/mail.md)
+* [`uploads`](ext/uploads/uploads.md)
 
 
 ## Internal functions
