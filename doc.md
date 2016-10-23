@@ -317,23 +317,31 @@ always have.
 	In other words, this is the logout function.
 
 
-## Core functions
+## URL functions
 
 * `$url = current_url()`
 
 	Returns the URL that is being processed. The URL is returned as
 	text, without HTML escaping.
 
+* `$val = arg($i)`
+
+	Returns `i`-th part of the URL, with `i` starting from zero. Returns
+	`null` if `i` is out of range.
+
+	The URL is split into parts by the slash character, so for URL
+	`www.example.net/foo/bar`, `arg(0)` will give `"foo"`, `arg(1)` will
+	give "bar" and `arg(2)` will give `null`.
+
 * `$arg = poparg()`
 
-	Returns next part of the parsed URL and shifts the arguments
-	pointer one step further. If there are no more parts, return
-	`null`.
+	Returns next part of the URL and shifts the arguments pointer one
+	step further. If there are no more parts, returns `null` and does
+	nothing.
 
-* `log_message($msg)`
-
-	Writes the given message to the logfile `<appdir>/log.log`, adding
-	several context columns to it.
+	This affects the index of the `arg` function. After a sucessful
+	call to `poparg` the indices shift by one, so the value returned
+	for `arg(1)` will now be returned with the call `arg(0)`.
 
 
 ## Request data
@@ -347,6 +355,14 @@ always have.
 
 	Returns unescaped plain text value of the POST parameter `name`,
 	or `null` if there is no such parameter.
+
+
+## Logging
+
+* `log_message($msg)`
+
+	Writes the given message to the logfile `<appdir>/log.log`, adding
+	several context columns to it.
 
 
 ## Error handling
